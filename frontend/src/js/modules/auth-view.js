@@ -41,7 +41,7 @@ export function renderLogin(container) {
     submit.disabled = true;
     try {
       await session.login(emailField.input.value.trim(), passwordField.input.value);
-      navigate('#/perfil');
+      navigate('#/inicio');
     } catch (error) {
       messageBox.appendChild(createAlert(error.message));
     } finally {
@@ -95,7 +95,7 @@ export function renderRegister(container) {
         password: passwordField.input.value,
         role: roleField.input.value,
       });
-      navigate('#/perfil');
+      navigate('#/inicio');
     } catch (error) {
       messageBox.appendChild(createAlert(error.message));
     } finally {

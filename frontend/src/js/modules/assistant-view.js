@@ -2,7 +2,7 @@ import { el, clearChildren, getElement } from '../utils/dom-helpers.js';
 import { on } from '../utils/events.js';
 import * as assistant from '../services/assistant-service.js';
 import { session } from './session.js';
-import { contextForRoute } from './router.js';
+import { contextForRoute, currentHash } from './router.js';
 
 let wrapper = null;
 let panelOpen = false;
@@ -15,7 +15,7 @@ export function initAssistant() {
   layer.appendChild(wrapper);
 
   on('session', () => {
-    if (session.isLogged) {
+    if (session.isLogged && !session.isTeacher) {
       wrapper.replaceChildren(buildButton());
     } else {
       panelOpen = false;
@@ -23,20 +23,34 @@ export function initAssistant() {
     }
   });
 
-  on('route', () => {
-    if (panelOpen) {
-      currentContext = contextForRoute();
+  on('route', ({ hash }) => {
+    if (hash === '#/inicio' && !session.isTeacher) {
+      panelOpen = false;
+      wrapper.replaceChildren();
+      wrapper.classList.add('chat-oculto');
+      return;
     }
+    wrapper.classList.remove('chat-oculto');
+    if (session.isLogged && !session.isTeacher && !wrapper.firstChild) {
+      wrapper.replaceChildren(buildButton());
+    }
+    if (panelOpen) currentContext = contextForRoute();
   });
 
-  if (session.isLogged) {
+  if (session.isLogged && !session.isTeacher && currentHash() === '#/inicio') {
+    wrapper.classList.add('chat-oculto');
+  } else if (session.isLogged && !session.isTeacher) {
     wrapper.replaceChildren(buildButton());
   }
 }
 
 function buildButton() {
-  const button = el('button', 'chat-boton', '💬');
-  button.setAttribute('aria-label', 'Abrir asistente');
+  const button = el('button', 'chat-boton');
+  const logo = el('img', 'chat-logo');
+  logo.src = new URL('../../assets/images/logosintitulo.png', import.meta.url).href;
+  logo.alt = '';
+  button.appendChild(logo);
+  button.setAttribute('aria-label', 'Abrir chat con Milo');
   button.addEventListener('click', togglePanel);
   return button;
 }
@@ -53,7 +67,12 @@ function buildPanel() {
   const panel = el('div', 'chat-panel');
 
   const header = el('div', 'chat-cabecera');
-  header.appendChild(el('h3', '', 'Asistente 🤖'));
+  const identity = el('div', 'chat-identidad');
+  const logo = el('img', 'chat-logo chat-logo-header');
+  logo.src = new URL('../../assets/images/logosintitulo.png', import.meta.url).href;
+  logo.alt = '';
+  identity.append(logo, el('h3', '', 'Milo'));
+  header.appendChild(identity);
   const closeButton = el('button', 'btn btn-icono', '✕');
   closeButton.addEventListener('click', togglePanel);
   header.appendChild(closeButton);
@@ -61,8 +80,7 @@ function buildPanel() {
 
   const messages = el('div', 'chat-mensajes');
   messages.id = 'chatMensajes';
-  const greeting = el('div', 'burbuja burbuja-bot', 'Hola, soy tu asistente. ¿En qué te ayudo?');
-  messages.appendChild(greeting);
+  messages.appendChild(buildBotMessage('¡Hola! Soy Milo. ¿En qué te ayudo?', 'feliz').wrapper);
   panel.appendChild(messages);
 
   const suggestions = el('div', 'chat-sugerencias');
@@ -145,19 +163,30 @@ async function submitQuery(message, input, messages) {
   messages.appendChild(userBubble);
   messages.scrollTop = messages.scrollHeight;
 
-  const typingBubble = el('div', 'burbuja burbuja-bot', '…');
-  messages.appendChild(typingBubble);
+  const reply = buildBotMessage('…', 'pensativo');
+  messages.appendChild(reply.wrapper);
   messages.scrollTop = messages.scrollHeight;
 
   try {
     const result = await assistant.askAssistant({ message, context: contextValue });
-    typingBubble.textContent = result.response;
+    reply.bubble.textContent = result.response;
+    reply.avatar.classList.replace('mascota-expresion-pensativo', 'mascota-expresion-feliz');
     const suggestions = document.getElementById('chatSugerencias');
     updateSuggestionsState(suggestions, result.suggestions);
   } catch (error) {
-    typingBubble.textContent = `Error: ${error.message}`;
+    reply.bubble.textContent = `Error: ${error.message}`;
+    reply.avatar.classList.replace('mascota-expresion-pensativo', 'mascota-expresion-triste');
   }
   messages.scrollTop = messages.scrollHeight;
+}
+
+function buildBotMessage(text, mood) {
+  const wrapper = el('div', 'chat-mensaje-milo');
+  const avatar = el('span', `mascota-expresion mascota-expresion-chat mascota-expresion-${mood}`);
+  avatar.setAttribute('aria-hidden', 'true');
+  const bubble = el('div', 'burbuja burbuja-bot', text);
+  wrapper.append(avatar, bubble);
+  return { wrapper, avatar, bubble };
 }
 
 function updateSuggestionsState(suggestions, suggestionList) {

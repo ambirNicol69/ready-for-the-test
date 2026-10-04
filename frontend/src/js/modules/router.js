@@ -3,21 +3,39 @@ import { emit } from '../utils/events.js';
 import { session } from './session.js';
 import { renderProfile } from './profile-view.js';
 import { renderCalculator } from './calculator-view.js';
-import { renderLab } from './lab-view.js';
 import { renderCatalog } from './catalog-view.js';
-import { renderMixing } from './mixing-view.js';
-import { renderIdentification } from './identification-view.js';
+import { renderLaboratory } from './lab-hub-view.js';
 import { renderQuiz } from './quiz-view.js';
 import { renderLogin, renderRegister } from './auth-view.js';
+import { renderClassrooms } from './classroom-view.js';
+import { renderTeacherHome } from './teacher-home-view.js';
+import { renderLessons } from './lessons-view.js';
+import { renderWelcome } from './welcome-view.js';
+import { renderMiniCalculatorGame } from './mini-calculator-game.js';
+import { renderMinigamesHub } from './minigames-hub-view.js';
+import { renderEquationGame } from './mini-equation-game.js';
+import { renderConversionGame } from './mini-conversion-game.js';
+import { renderInstrumentGame } from './mini-instrument-game.js';
+import { renderSubstanceGame } from './mini-substance-game.js';
+import { renderMixtureGame } from './mini-mixture-game.js';
 
 const AUTHED_ROUTES = {
+  '#/inicio': (container) => session.isTeacher ? renderTeacherHome(container) : renderWelcome(container),
   '#/perfil': renderProfile,
   '#/calculadora': renderCalculator,
-  '#/laboratorio': renderLab,
+  '#/laboratorio': (container) => renderLaboratory(container),
   '#/catalogo': renderCatalog,
-  '#/mezclas': renderMixing,
-  '#/identificacion': renderIdentification,
+  '#/identificacion': (container) => renderLaboratory(container, 'identificacion'),
   '#/salas': renderQuiz,
+  '#/clases': renderClassrooms,
+  '#/lecciones': renderLessons,
+  '#/juegos/calculadora': renderMiniCalculatorGame,
+  '#/juegos': renderMinigamesHub,
+  '#/juegos/ecuacion': renderEquationGame,
+  '#/juegos/conversiones': renderConversionGame,
+  '#/juegos/instrumentos': renderInstrumentGame,
+  '#/juegos/sustancias': renderSubstanceGame,
+  '#/juegos/mezclas': renderMixtureGame,
 };
 
 const PUBLIC_ROUTES = {
@@ -26,20 +44,27 @@ const PUBLIC_ROUTES = {
 };
 
 const CONTEXT_BY_ROUTE = {
+  '#/inicio': 'inicio_docente',
   '#/perfil': 'perfil',
   '#/calculadora': 'calculadora',
   '#/laboratorio': 'laboratorio',
   '#/catalogo': 'catalogo',
-  '#/mezclas': 'mezclas',
   '#/identificacion': 'identificacion',
   '#/salas': 'salas',
+  '#/clases': 'clases',
+  '#/lecciones': 'lecciones',
+  '#/juegos/calculadora': 'juegos',
+  '#/juegos': 'juegos',
 };
 
+let profileOpenRequested = false;
+
 export function currentHash() {
-  return location.hash || '#/perfil';
+  return location.hash || '#/inicio';
 }
 
 export function navigate(hash) {
+  profileOpenRequested = hash === '#/perfil';
   if (location.hash === hash) {
     handleRoute();
   } else {
@@ -59,10 +84,30 @@ export function contextForRoute() {
 function handleRoute() {
   const hash = currentHash();
   const container = getElement('app');
+  if (hash === '#/mezclas') {
+    location.hash = '#/laboratorio';
+    return;
+  }
   let view = AUTHED_ROUTES[hash];
 
   if (view && !session.isLogged) {
     location.hash = '#/login';
+    return;
+  }
+
+  if (session.isLogged && hash === '#/perfil' && !profileOpenRequested) {
+    location.hash = '#/inicio';
+    return;
+  }
+  if (hash === '#/perfil') profileOpenRequested = false;
+
+  if (session.isLogged && !session.isTeacher && hash === '#/calculadora') {
+    location.hash = '#/lecciones';
+    return;
+  }
+
+  if (session.isTeacher && view && !['#/inicio', '#/salas', '#/clases', '#/perfil'].includes(hash)) {
+    location.hash = '#/inicio';
     return;
   }
 
@@ -71,7 +116,7 @@ function handleRoute() {
   }
 
   if (session.isLogged && (hash === '#/login' || hash === '#/registro')) {
-    location.hash = '#/perfil';
+    location.hash = '#/inicio';
     return;
   }
 

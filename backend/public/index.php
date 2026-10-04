@@ -50,10 +50,14 @@ require_once __DIR__ . '/../src/controllers/lab-catalog-controller.php';
 require_once __DIR__ . '/../src/controllers/lab-experiment-controller.php';
 require_once __DIR__ . '/../src/controllers/quiz-room-controller.php';
 require_once __DIR__ . '/../src/controllers/assistant-controller.php';
+require_once __DIR__ . '/../src/controllers/classroom-controller.php';
+require_once __DIR__ . '/../src/controllers/lesson-progress-controller.php';
+require_once __DIR__ . '/../src/controllers/profile-customization-controller.php';
+require_once __DIR__ . '/../src/controllers/minigame-controller.php';
 require_once __DIR__ . '/../src/middlewares/auth-middleware.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -119,6 +123,11 @@ try {
         $quizRoomService,
         new QuizAutoService($quizRoomService)
     );
+
+    $classroomController = new ClassroomController($database);
+    $lessonProgressController = new LessonProgressController($database);
+    $profileCustomizationController = new ProfileCustomizationController($database);
+    $minigameController = new MinigameController($database);
 
     $assistantController = new AssistantController(
         new AssistantService(

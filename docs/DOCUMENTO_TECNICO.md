@@ -9,7 +9,7 @@
 
 ## 1. Descripción general
 
-Ready for the Test? es una plataforma web de práctica académica que fusiona tres herramientas
+Ready for the Test? es una plataforma web de práctica académica que integra herramientas
 en un solo sistema:
 
 1. **Simulador de laboratorio** de Química/Física con cuatro estaciones: registro de muestras
@@ -18,6 +18,8 @@ en un solo sistema:
 2. **Calculadora científica** con historial de operaciones por usuario.
 3. **Salas de examen** tipo Kahoot, donde un docente crea salas con preguntas y los estudiantes
    se unen con un código de 6 caracteres para responder y sumar puntos.
+4. **Minijuegos educativos**: dos experiencias por materia (Matemáticas, Física y Química), con
+   puntuación, duración y récords personales guardados por estudiante.
 
 Todos los módulos comparten un mismo sistema de cuentas, un marcador de puntos y a un
 asistente de contexto (IA basada en reglas) que responde según la pantalla activa.
@@ -39,6 +41,21 @@ backend/router.php  (servidor PHP integrado)
         ├── /api/*  → backend/public/index.php (front controller)
         │                └── enrutador → controlador → servicio → repositorio → MySQL
         └── demás rutas → sirve los estáticos de frontend/
+```
+
+Vista resumida de la estructura entregada:
+
+```text
+frontend/                 backend/
+|-- index.html            |-- router.php
+|-- src/                  |-- public/index.php
+    |-- css/              |-- database/
+    |-- js/                   |-- schema.sql
+        |-- main.js           |-- seed.sql
+        |-- modules/      |-- src/
+        |-- services/         |-- config/ routes/ middlewares/
+        |-- utils/            |-- controllers/ services/
+    |-- assets/               |-- repositories/ models/ utils/
 ```
 
 ### 2.1 Capas del backend
@@ -117,6 +134,40 @@ salas o muestras.
 
 ---
 
+### 3.5 Tablas de minijuegos
+
+| Tabla | Función |
+| ----- | ------- |
+| `minigame_attempts` | Historial de puntuación y duración por estudiante y minijuego |
+
+### 3.6 Diagrama de relaciones
+
+```mermaid
+erDiagram
+    USERS ||--o{ CALCULATOR_OPERATIONS : registra
+    USERS ||--o{ LAB_SAMPLES : crea
+    USERS ||--o{ LAB_EXPERIMENTS : realiza
+    LAB_SAMPLES o|--o{ LAB_EXPERIMENTS : referencia
+    USERS ||--o{ DISCOVERED_REACTIONS : descubre
+    MIXTURE_REACTIONS ||--o{ DISCOVERED_REACTIONS : corresponde
+    REAGENTS ||--o{ MIXTURE_REACTIONS : participa
+    USERS ||--o{ QUIZ_ROOMS : crea
+    QUIZ_ROOMS ||--o{ QUIZ_QUESTIONS : contiene
+    QUIZ_QUESTIONS ||--|{ QUIZ_QUESTION_OPTIONS : ofrece
+    USERS ||--o{ QUIZ_ATTEMPTS : responde
+    QUIZ_ROOMS ||--o{ QUIZ_ATTEMPTS : recibe
+    USERS ||--o{ CLASSROOMS : ensena
+    CLASSROOMS ||--o{ CLASSROOM_STUDENTS : matricula
+    USERS ||--o{ CLASSROOM_STUDENTS : participa
+    CLASSROOMS ||--o{ ASSIGNMENTS : publica
+    ASSIGNMENTS ||--o{ ASSIGNMENT_SUBMISSIONS : recibe
+    USERS ||--o{ ASSIGNMENT_SUBMISSIONS : entrega
+    USERS ||--o{ STUDENT_LESSON_PROGRESS : avanza
+    USERS ||--o| USER_CUSTOMIZATIONS : personaliza
+    USERS ||--o{ USER_AVATAR_ITEMS : posee
+    USERS ||--o{ MINIGAME_ATTEMPTS : registra
+```
+
 ## 4. API REST
 
 Todos los endpoints responden con `{ success, data, message }`. Excepto registro y login,
@@ -163,6 +214,8 @@ todos exigen el encabezado `Authorization: Bearer <token>` (JWT con vigencia de 
 | POST | `/api/quiz-rooms/auto` | Docente: crea sala automática (`topic`, `question_count` 1–10, `points_value` 1–100); las opciones se barajan en el servidor |
 | POST | `/api/quiz-rooms/join` | Estudiante: se une con `code`; recibe preguntas sin respuestas |
 | POST | `/api/quiz-answers` | Estudiante: envía `attempt_id` + `answers` y recibe la calificación |
+| POST | `/api/minigame-attempts` | Guarda puntuación y duración, y suma los puntos al perfil del estudiante |
+| GET | `/api/minigames/{gameCode}/stats` | Consulta récords personales del estudiante |
 
 ### 4.5 Asistente de contexto (IA por reglas)
 

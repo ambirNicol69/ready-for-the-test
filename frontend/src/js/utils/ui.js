@@ -13,7 +13,12 @@ export function createField({ id, label, type = 'text', options = [], placeholde
   const fieldLabel = el('label', '', label);
   let input;
 
-  if (type === 'select') {
+  if (type === 'textarea') {
+    input = document.createElement('textarea');
+    input.id = id;
+    input.placeholder = placeholder;
+    input.rows = 3;
+  } else if (type === 'select') {
     input = document.createElement('select');
     input.id = id;
     for (const option of options) {

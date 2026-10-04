@@ -13,6 +13,10 @@ export const session = {
     return this.user !== null && this.user.role === 'docente';
   },
 
+  get isStudent() {
+    return this.user !== null && this.user.role === 'estudiante';
+  },
+
   async init() {
     if (!getToken()) {
       this.user = null;

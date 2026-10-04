@@ -3,126 +3,131 @@ import { createViewHeader, createAlert } from '../utils/ui.js';
 import { formatState, labelFor } from '../utils/formatters.js';
 import * as lab from '../services/lab-service.js';
 import { MATH_TOPICS } from './math-catalog.js';
+import { LESSONS } from './lesson-catalog.js';
 
-const TABS = [
+const SUBJECTS = [
+  { key: 'quimica', label: 'Química' },
+  { key: 'fisica', label: 'Física' },
+  { key: 'matematicas', label: 'Matemáticas' },
+];
+
+const CHEMISTRY_SECTIONS = [
   { key: 'sustancias', label: 'Sustancias', loader: () => lab.listKnownSubstances() },
   { key: 'reactivos', label: 'Reactivos', loader: () => lab.listReagents() },
   { key: 'reacciones', label: 'Reacciones', loader: () => lab.listReactions() },
-  { key: 'matematicas', label: 'Matemáticas', loader: () => MATH_TOPICS },
 ];
-
-const TAB_BADGES = {
-  sustancias: 'Sustancias de referencia con propiedades conocidas, descripción y datos útiles.',
-  reactivos: 'Reactivos de la mesa de mezclas con su color, icono y uso.',
-  reacciones: 'Reacciones conocidas al mezclar pares de reactivos.',
-  matematicas: 'Temas de repaso: aritmética, álgebra, geometría y proporcionalidad.',
-};
 
 export function renderCatalog(container) {
   clearChildren(container);
-  container.appendChild(createViewHeader('Catálogo', 'Consulta sustancias, reactivos, reacciones y temas de matemáticas.'));
-
-  const tabBar = el('div', 'vista-acciones');
+  container.appendChild(createViewHeader('Catálogo de términos', 'Explora conceptos organizados por materia.'));
+  const subjectNav = el('nav', 'vista-acciones');
+  subjectNav.setAttribute('aria-label', 'Materias');
   const content = el('section');
-  container.appendChild(tabBar);
-  container.appendChild(content);
+  container.append(subjectNav, content);
 
-  for (const tab of TABS) {
-    const button = el('button', 'chip', tab.label);
-    button.addEventListener('click', () => {
-      switchTab(tab, button, content, tabBar);
+  SUBJECTS.forEach((subject, index) => {
+    const button = el('button', 'chip', subject.label);
+    button.type = 'button';
+    button.addEventListener('click', () => selectSubject(subject, button));
+    subjectNav.appendChild(button);
+    if (index === 0) selectSubject(subject, button);
+  });
+
+  function selectSubject(subject, button) {
+    subjectNav.querySelectorAll('.chip').forEach((item) => {
+      item.classList.toggle('is-activo', item === button);
     });
-    tabBar.appendChild(button);
-    if (tab.key === 'sustancias') {
-      button.classList.add('is-activo');
-    }
+    if (subject.key === 'quimica') renderChemistry(content);
+    if (subject.key === 'fisica') renderPhysics(content);
+    if (subject.key === 'matematicas') renderMath(content);
   }
-
-  switchTab(TABS[0], tabBar.querySelector('.chip'), content, tabBar);
 }
 
-async function switchTab(tab, button, content, tabBar) {
-  for (const chip of tabBar.querySelectorAll('.chip')) {
-    chip.classList.remove('is-activo');
-  }
-  button.classList.add('is-activo');
-  content.replaceChildren(el('p', 'estado-vacio', 'Cargando…'));
+function renderChemistry(content) {
+  const nav = el('nav', 'vista-acciones');
+  nav.setAttribute('aria-label', 'Términos de química');
+  const panel = el('section');
+  content.replaceChildren(nav, panel);
+  CHEMISTRY_SECTIONS.forEach((section, index) => {
+    const button = el('button', 'chip', section.label);
+    button.type = 'button';
+    button.addEventListener('click', () => loadChemistrySection(section, button, nav, panel));
+    nav.appendChild(button);
+    if (index === 0) loadChemistrySection(section, button, nav, panel);
+  });
+}
 
+async function loadChemistrySection(section, button, nav, panel) {
+  nav.querySelectorAll('.chip').forEach((item) => item.classList.toggle('is-activo', item === button));
+  panel.replaceChildren(el('p', 'estado-vacio', 'Cargando términos…'));
   try {
-    const items = await tab.loader();
-    content.replaceChildren(renderItems(tab.key, items));
+    const items = await section.loader();
+    panel.replaceChildren(renderCards(section.key, items));
   } catch (error) {
-    content.replaceChildren(createAlert(error.message));
+    panel.replaceChildren(createAlert(error.message));
   }
 }
 
-function renderItems(key, items) {
-  const panel = document.createElement('div');
-  panel.appendChild(el('p', 'estado-vacio', TAB_BADGES[key]));
+function renderPhysics(content) {
+  const lesson = LESSONS.find((item) => item.subject === 'Física');
+  const cards = (lesson?.concepts || []).map((concept) => ({ name: concept.title, description: concept.text }));
+  content.replaceChildren(renderCards('conceptos', cards, 'Conceptos clave de Física'));
+}
 
-  if (items.length === 0) {
-    panel.appendChild(el('p', 'estado-vacio', 'No hay datos disponibles.'));
+function renderMath(content) {
+  const grid = el('div', 'rejilla lista-horizontal');
+  MATH_TOPICS.forEach((topic) => grid.appendChild(buildMathCard(topic)));
+  content.replaceChildren(el('p', 'estado-vacio', 'Fórmulas y conceptos de Matemáticas.'), grid);
+}
+
+function renderCards(key, items, description = '') {
+  const panel = el('div');
+  if (description) panel.appendChild(el('p', 'estado-vacio', description));
+  if (!items.length) {
+    panel.appendChild(el('p', 'estado-vacio', 'No hay términos disponibles.'));
     return panel;
   }
-
-  const grid = el('div', 'rejilla');
-  grid.classList.add('lista-horizontal');
-  for (const item of items) {
-    grid.appendChild(buildCard(key, item));
-  }
+  const grid = el('div', 'rejilla lista-horizontal');
+  items.forEach((item) => grid.appendChild(buildCard(key, item)));
   panel.appendChild(grid);
   return panel;
 }
 
 function buildCard(key, item) {
   const card = el('article', 'tarjeta');
-
   if (key === 'sustancias') {
-    card.appendChild(el('div', 'tarjeta-icono', '🧪'));
-    card.appendChild(el('h3', '', item.name));
-    card.appendChild(el('p', 'estado-vacio', item.description));
-    card.appendChild(el('p', '', `Estado: ${formatState(item.state)} · ${labelFor(item.transparency)} · ${labelFor(item.conductivity)}`));
-    card.appendChild(el('span', 'badge badge-primario', `ρ ${item.density} g/mL`));
-    card.appendChild(el('p', 'estado-vacio', item.detail));
+    card.append(el('div', 'tarjeta-icono', '🧪'), el('h3', '', item.name));
+    card.append(el('p', 'estado-vacio', item.description));
+    card.append(el('p', '', `Estado: ${formatState(item.state)} · ${labelFor(item.transparency)} · ${labelFor(item.conductivity)}`));
+    card.append(el('span', 'badge badge-primario', `ρ ${item.density} g/mL`));
+    card.append(el('p', 'estado-vacio', item.detail));
+  } else if (key === 'reactivos') {
+    const dot = el('span', 'vial-muestra');
+    dot.style.setProperty('--vial-color', item.color_hex);
+    card.append(dot, el('h3', '', `${item.icon} ${item.name}`));
+    card.append(el('p', 'estado-vacio', item.description));
+    card.append(el('span', 'badge badge-ambar', item.id));
+  } else if (key === 'reacciones') {
+    card.append(el('div', 'tarjeta-icono', '⚗️'), el('h3', '', item.result_name));
+    card.append(el('p', '', `${item.reagent_a_id} + ${item.reagent_b_id}`));
+    card.append(el('p', '', item.description));
+    card.append(el('span', 'badge badge-verde', labelFor(item.effect)));
+  } else {
+    card.append(el('div', 'tarjeta-icono', '⚛️'), el('h3', '', item.name));
+    card.append(el('p', 'estado-vacio', item.description));
   }
-
-  if (key === 'reactivos') {
-    const colorDot = el('span', 'vial-muestra');
-    colorDot.style.setProperty('--vial-color', item.color_hex);
-    card.appendChild(colorDot);
-    card.appendChild(el('h3', '', `${item.icon} ${item.name}`));
-    card.appendChild(el('p', 'estado-vacio', item.description));
-    card.appendChild(el('span', 'badge badge-ambar', item.id));
-  }
-
-  if (key === 'reacciones') {
-    card.appendChild(el('div', 'tarjeta-icono', '⚗️'));
-    card.appendChild(el('h3', '', item.result_name));
-    card.appendChild(el('p', '', `${item.reagent_a_id} + ${item.reagent_b_id}`));
-    card.appendChild(el('p', '', item.description));
-    card.appendChild(el('span', 'badge badge-verde', labelFor(item.effect)));
-  }
-
-  if (key === 'matematicas') {
-    card.appendChild(buildMathTopicCard(item));
-  }
-
   return card;
 }
 
-function buildMathTopicCard(topic) {
-  const wrapper = el('div');
-  wrapper.appendChild(el('div', 'tarjeta-icono', topic.icon));
-  wrapper.appendChild(el('h3', '', topic.title));
-  wrapper.appendChild(el('span', 'badge badge-primario', topic.badge));
-
-  for (const item of topic.items) {
-    const itemBox = el('div', 'cajon');
-    itemBox.appendChild(el('p', '', item.name));
-    itemBox.appendChild(el('p', 'estado-vacio', item.formula));
-    itemBox.appendChild(el('p', 'estado-vacio', item.note));
-    wrapper.appendChild(itemBox);
-  }
-
-  return wrapper;
+function buildMathCard(topic) {
+  const card = el('article', 'tarjeta');
+  card.append(el('div', 'tarjeta-icono', topic.icon), el('h3', '', topic.title));
+  card.appendChild(el('span', 'badge badge-primario', topic.badge));
+  topic.items.forEach((term) => {
+    const item = el('div', 'cajon');
+    item.append(el('p', '', term.name), el('p', 'estado-vacio', term.formula));
+    item.appendChild(el('p', 'estado-vacio', term.note));
+    card.appendChild(item);
+  });
+  return card;
 }

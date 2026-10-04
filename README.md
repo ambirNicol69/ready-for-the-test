@@ -13,6 +13,9 @@ practiquen los temas.
 - ✅ Módulo de laboratorio completo: muestras, catálogos, identificación, mesa de mezclas con descubrimientos y puntos por experimento.
 - ✅ Salas de examen tipo Kahoot: docentes crean salas con pregunta/respuestas, estudiantes se unen con código y reciben puntos.
 - ✅ Salas automáticas con IA: el docente elige un tema (aritmética, álgebra, geometría o de laboratorio: sustancias, mezclas, densidad), cantidad de preguntas (1–10) y puntos por pregunta (1–100); el sistema genera la sala al instante.
+- 🕹️ Seis minijuegos para estudiantes (dos por materia): Reto Calculadora y Ordena la ecuación (Matemáticas), Carrera de conversiones y ¿Qué instrumento usarías? (Física), Sustancia misteriosa y Mezcla segura (Química). Al terminar los 8 retos, los puntos de la partida se guardan y se suman al puntaje del estudiante.
+- 🖼️ Tienda de avatares para estudiantes con 13 imágenes de `frontend/src/assets/images/studentpfp/`; cada avatar cuesta 100 puntos. Los accesorios anteriores fueron retirados.
+- ✅ Salones de clase: docentes organizan grupos, añaden estudiantes registrados por correo, publican asignaciones con documentos o imágenes y califican entregas con comentarios.
 - ✅ Catálogo informativo ampliado: sustancias y reactivos con descripción y detalle, además de una nueva sección de Matemáticas (fórmulas y apuntes de repaso).
 - ✅ Asistente de contexto (IA) basado en reglas: responde según la pantalla, con el avance del usuario y tópicos de cada módulo.
 
@@ -44,6 +47,15 @@ Endpoints disponibles (base: `backend/public/index.php`):
 | POST   | `/api/quiz-rooms/auto`            | Crear sala automática: `title`, `topic`, `question_count` (1–10), `points_value` (1–100) | Sí (docente) |
 | POST   | `/api/quiz-rooms/join`            | Unirse con `code` (devuelve preguntas sin respuestas) | Sí (estudiante) |
 | POST   | `/api/quiz-answers`               | Enviar `attempt_id` + `answers` (`question_id`, `option_index`) y calificar | Sí (estudiante) |
+| GET/POST | `/api/classrooms` | Listar salones del usuario o crear salón (docente) | Sí |
+| POST | `/api/classrooms/{id}/students` | Añadir al salón un estudiante registrado por correo (docente) | Sí |
+| POST | `/api/classrooms/{id}/assignments` | Publicar instrucciones, fecha y archivo (docente) | Sí |
+| POST | `/api/assignments/{id}/submissions` | Entregar archivo de asignación (estudiante matriculado) | Sí |
+| GET | `/api/assignments/{id}/submissions` | Consultar entregas (docente propietario) | Sí |
+| PATCH | `/api/submissions/{id}` | Guardar calificación y comentario (docente propietario) | Sí |
+| GET/POST | `/api/lesson-progress` | Consultar y guardar avance de lecciones por estudiante | Sí |
+| POST | `/api/minigame-attempts` | Guardar puntuación y duración; suma los puntos al perfil | Sí (estudiante) |
+| GET | `/api/minigames/{gameCode}/stats` | Consultar récords personales del minijuego | Sí (estudiante) |
 | POST   | `/api/assistant/query`            | Consultar al asistente: `message` + `context` opcional | Sí |
 | GET    | `/api/assistant/help?context=`    | Tópicos de ayuda disponibles por pantalla | Sí |
 | GET    | `/api/assistant/context`          | Avance del usuario (puntos, experimentos, muestras, reacciones, salas) | Sí |
@@ -57,6 +69,10 @@ protegidos.
 1. Abre phpMyAdmin (XAMPP) → pestaña "Importar".
 2. Importa primero `backend/database/schema.sql` (crea la BD y las tablas).
 3. Importa luego `backend/database/seed.sql` (carga sustancias, reactivos y reacciones ya existentes).
+
+Si ya tienes una base de datos creada, importa una sola vez `backend/database/classrooms-migration.sql` para añadir las tablas del salón de clase. Importa también `backend/database/lessons-migration.sql` para habilitar el progreso de las lecciones, `backend/database/profile-shop-migration.sql` para guardar colores y avatares, y `backend/database/minigames-migration.sql` para guardar puntuaciones y tiempos de minijuegos. Si ya habías importado las migraciones de la tienda y de minijuegos, ejecuta una vez `backend/database/profile-avatar-shop-migration.sql` para retirar los accesorios antiguos, y `backend/database/minigame-attempt-token-migration.sql` para habilitar el guardado idempotente de puntuaciones.
+
+Los archivos adjuntos admitidos son PDF, documentos y hojas de Office, y fotos JPG, PNG o WebP (máximo 15 MB). Se guardan en `frontend/uploads/classes`.
 
 ## Requisitos previos
 
@@ -112,3 +128,8 @@ La aplicación en funcionamiento:
 
 - Ambar
 - Abel
+
+## Documentación de entrega RA1
+
+- [Documento técnico](docs/DOCUMENTO_TECNICO.md): arquitectura, relaciones de base de datos y API.
+- [Autoevaluación de requisitos](docs/AUTOEVALUACION_RA1.md): lista de verificación para el equipo antes de la presentación.

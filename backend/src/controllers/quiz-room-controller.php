@@ -95,7 +95,9 @@ final class QuizRoomController
     private function assertStudent(User $user): void
     {
         if ($user->role !== User::ROLE_STUDENT) {
-            throw new ForbiddenException('Solo los estudiantes pueden unirse a salas');
+            throw new ForbiddenException(
+                "Solo las cuentas con rol 'estudiante' pueden unirse a salas. El rol actual es '{$user->role}'."
+            );
         }
     }
 }

@@ -20,6 +20,21 @@ CREATE TABLE users (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE user_customizations (
+  user_id INT NOT NULL PRIMARY KEY,
+  accent_color CHAR(7) NOT NULL DEFAULT '#0e8388',
+  avatar_item VARCHAR(30) NULL,
+  CONSTRAINT fk_customization_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE user_avatar_items (
+  user_id INT NOT NULL,
+  item_id VARCHAR(30) NOT NULL,
+  purchased_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, item_id),
+  CONSTRAINT fk_avatar_item_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- ============================================================
 -- MÓDULO: CALCULADORA
 -- ============================================================
@@ -156,4 +171,72 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
   CONSTRAINT fk_attempt_room FOREIGN KEY (room_id) REFERENCES quiz_rooms(id) ON DELETE CASCADE,
   CONSTRAINT fk_attempt_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE KEY unique_room_user (room_id, user_id)
+);
+
+-- ============================================================
+-- MÓDULO: SALONES Y ASIGNACIONES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS classrooms (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  teacher_id INT NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  join_code VARCHAR(8) NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_classroom_teacher FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS classroom_students (
+  classroom_id INT NOT NULL,
+  student_id INT NOT NULL,
+  joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (classroom_id, student_id),
+  CONSTRAINT fk_class_student_class FOREIGN KEY (classroom_id) REFERENCES classrooms(id) ON DELETE CASCADE,
+  CONSTRAINT fk_class_student_user FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS assignments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  classroom_id INT NOT NULL,
+  title VARCHAR(160) NOT NULL,
+  instructions TEXT NULL,
+  file_path VARCHAR(255) NULL,
+  file_name VARCHAR(255) NULL,
+  due_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_assignment_class FOREIGN KEY (classroom_id) REFERENCES classrooms(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS assignment_submissions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  assignment_id INT NOT NULL,
+  student_id INT NOT NULL,
+  file_path VARCHAR(255) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  grade DECIMAL(5,2) NULL,
+  feedback TEXT NULL,
+  graded_at DATETIME NULL,
+  UNIQUE KEY unique_assignment_student (assignment_id, student_id),
+  CONSTRAINT fk_submission_assignment FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
+  CONSTRAINT fk_submission_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Progreso individual de las lecciones del estudiante (0 video, 1 conceptos, 2 ejemplo, 3 ejercicio, 4 completada)
+CREATE TABLE IF NOT EXISTS student_lesson_progress (
+  student_id INT NOT NULL,
+  lesson_slug VARCHAR(40) NOT NULL,
+  phase TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  quiz_answer SMALLINT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (student_id, lesson_slug),
+  CONSTRAINT fk_lesson_progress_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS minigame_attempts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  attempt_token CHAR(36) NOT NULL UNIQUE,
+  user_id INT NOT NULL,
+  game_code VARCHAR(40) NOT NULL,
+  score SMALLINT UNSIGNED NOT NULL,
+  duration_seconds INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_minigame_user_game (user_id, game_code),
+  CONSTRAINT fk_minigame_attempt_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

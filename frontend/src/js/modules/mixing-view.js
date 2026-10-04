@@ -10,8 +10,8 @@ let reagentCache = null;
 export function renderMixing(container) {
   clearChildren(container);
   container.appendChild(createViewHeader(
-    'Mesa de mezclas',
-    'Combina dos reactivos y observa la reacción que se produce.'
+    'Laboratorio',
+    'Combina sustancias y observa cómo cambia el color y se manifiesta la reacción.'
   ));
 
   const grid = el('div', 'dos-columnas');
@@ -31,7 +31,8 @@ export function renderMixing(container) {
 
   const result = el('div', 'bandeja-resultado');
   result.id = 'zonaResultado';
-  result.appendChild(el('p', '', 'Selecciona dos reactivos y presiona Mezclar.'));
+  const vessel = buildReactionVessel();
+  result.append(el('p', '', 'Selecciona dos reactivos y observa el cambio.'), vessel.scene);
   mixCard.appendChild(result);
 
   const mixButton = el('button', 'btn btn-ambar btn-bloque', '🧪 Mezclar');
@@ -42,10 +43,10 @@ export function renderMixing(container) {
   grid.appendChild(mixCard);
   container.appendChild(grid);
 
-  initMixingArea(shelf, slots, result, mixButton);
+  initMixingArea(shelf, slots, result, mixButton, vessel);
 }
 
-function initMixingArea(shelf, slots, result, mixButton) {
+function initMixingArea(shelf, slots, result, mixButton, vessel) {
   const selected = [];
   let reagents = reagentCache || [];
 
@@ -93,6 +94,16 @@ function initMixingArea(shelf, slots, result, mixButton) {
     }
     renderShelf();
     renderSlots();
+    renderPreview();
+  }
+
+  function renderPreview() {
+    const chosen = selected.map((id) => reagents.find((item) => item.id === id)).filter(Boolean);
+    const color = chosen.length === 2
+      ? averageHex(chosen[0].color_hex, chosen[1].color_hex)
+      : chosen[0]?.color_hex || '#9fc5c8';
+    animateVessel(vessel, color, false);
+    result.replaceChildren(vessel.scene, el('p', '', chosen.length === 2 ? 'Listo para mezclar.' : 'Selecciona dos reactivos y observa el cambio.'));
   }
 
   async function doMix() {
@@ -100,8 +111,8 @@ function initMixingArea(shelf, slots, result, mixButton) {
       return;
     }
     mixButton.disabled = true;
-    clearChildren(result);
-    result.appendChild(el('p', '', 'Mezclando…'));
+    result.replaceChildren(vessel.scene, el('p', '', 'Mezclando las sustancias…'));
+    vessel.scene.classList.add('is-mezclando');
     try {
       const data = await lab.mixReagents({ reagentAId: selected[0], reagentBId: selected[1] });
       renderResult(data);
@@ -110,24 +121,31 @@ function initMixingArea(shelf, slots, result, mixButton) {
         showToast(`¡+${data.points_awarded} puntos!`, 'ok');
       }
     } catch (error) {
-      result.replaceChildren(createAlert(error.message));
+      vessel.scene.classList.remove('is-mezclando');
+      result.replaceChildren(vessel.scene, createAlert(error.message));
     } finally {
       mixButton.disabled = selected.length < 2;
     }
   }
 
   function renderResult(data) {
-    clearChildren(result);
+    vessel.scene.classList.remove('is-mezclando');
+    const color = data.reaction?.result_color_hex || colorOfSelected();
+    animateVessel(vessel, color, data.effect !== 'ninguno' && data.effect !== null);
+    result.replaceChildren(vessel.scene);
     if (data.reaction === null) {
-      result.appendChild(el('p', 'bandeja-nombre', 'No se produjo reacción visible'));
-      result.appendChild(el('span', 'badge badge-rojo', 'Sin efecto'));
+      result.appendChild(el('p', 'bandeja-nombre', 'Mezcla sin reacción visible'));
+      result.appendChild(el('p', 'bandeja-efecto', 'Las sustancias se combinaron, pero no se observó un cambio químico.'));
       return;
     }
-    const colorDot = buildColorDot(data.reaction.result_color_hex);
-    result.appendChild(colorDot);
     result.appendChild(el('p', 'bandeja-nombre', data.reaction.result_name));
     result.appendChild(el('span', 'badge badge-verde', labelFor(data.effect)));
     result.appendChild(el('p', 'bandeja-efecto', data.reaction.description));
+  }
+
+  function colorOfSelected() {
+    const chosen = selected.map((id) => reagents.find((item) => item.id === id)).filter(Boolean);
+    return chosen.length > 1 ? averageHex(chosen[0].color_hex, chosen[1].color_hex) : chosen[0]?.color_hex || '#9fc5c8';
   }
 
   mixButton.addEventListener('click', doMix);
@@ -160,4 +178,29 @@ function buildColorDot(colorHex) {
   const dot = el('span', 'vial-muestra');
   dot.style.setProperty('--vial-color', colorHex);
   return dot;
+}
+
+function buildReactionVessel() {
+  const scene = el('div', 'escena-mezcla');
+  const vessel = el('div', 'vaso-mezcla');
+  const liquid = el('div', 'liquido-mezcla');
+  vessel.appendChild(liquid);
+  scene.appendChild(vessel);
+  return { scene, liquid };
+}
+
+function animateVessel(vessel, color, hasReaction) {
+  vessel.liquid.style.setProperty('--color-liquido', color);
+  vessel.scene.classList.toggle('hay-reaccion', hasReaction);
+  vessel.scene.classList.remove('is-lleno');
+  requestAnimationFrame(() => vessel.scene.classList.add('is-lleno'));
+}
+
+function averageHex(first, second) {
+  const channels = [1, 3, 5].map((offset) => {
+    const a = Number.parseInt(first.slice(offset, offset + 2), 16) || 0;
+    const b = Number.parseInt(second.slice(offset, offset + 2), 16) || 0;
+    return Math.round((a + b) / 2).toString(16).padStart(2, '0');
+  });
+  return `#${channels.join('')}`;
 }

@@ -172,6 +172,55 @@ if ($requestMethod === 'POST' && $route === '/api/quiz-answers') {
     return;
 }
 
+if ($requestMethod === 'GET' && $route === '/api/classrooms') {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->list($currentUser); return;
+}
+if ($requestMethod === 'POST' && $route === '/api/classrooms') {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->create($currentUser); return;
+}
+if ($requestMethod === 'POST' && matchRoute('/api/classrooms/{id}/students', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->addStudent($currentUser, (int) $routeParams['id']); return;
+}
+if ($requestMethod === 'POST' && matchRoute('/api/classrooms/{id}/assignments', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->createAssignment($currentUser, (int) $routeParams['id']); return;
+}
+if ($requestMethod === 'POST' && matchRoute('/api/assignments/{id}/submissions', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->submit($currentUser, (int) $routeParams['id']); return;
+}
+if ($requestMethod === 'GET' && matchRoute('/api/assignments/{id}/submissions', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->submissions($currentUser, (int) $routeParams['id']); return;
+}
+if ($requestMethod === 'PATCH' && matchRoute('/api/submissions/{id}', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->grade($currentUser, (int) $routeParams['id']); return;
+}
+
+if ($requestMethod === 'GET' && $route === '/api/lesson-progress') {
+    $currentUser = $authMiddleware->authenticate(); $lessonProgressController->list($currentUser); return;
+}
+if ($requestMethod === 'POST' && $route === '/api/lesson-progress') {
+    $currentUser = $authMiddleware->authenticate(); $lessonProgressController->save($currentUser); return;
+}
+
+if ($requestMethod === 'POST' && $route === '/api/minigame-attempts') {
+    $currentUser = $authMiddleware->authenticate(); $minigameController->saveAttempt($currentUser); return;
+}
+if ($requestMethod === 'GET' && matchRoute('/api/minigames/{gameCode}/stats', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate(); $minigameController->stats($currentUser, $routeParams['gameCode']); return;
+}
+
+if ($requestMethod === 'GET' && $route === '/api/profile/customization') {
+    $currentUser = $authMiddleware->authenticate(); $profileCustomizationController->get($currentUser); return;
+}
+if ($requestMethod === 'PUT' && $route === '/api/profile/customization') {
+    $currentUser = $authMiddleware->authenticate(); $profileCustomizationController->save($currentUser); return;
+}
+if ($requestMethod === 'GET' && $route === '/api/shop/items') {
+    $currentUser = $authMiddleware->authenticate(); $profileCustomizationController->shop($currentUser); return;
+}
+if ($requestMethod === 'POST' && $route === '/api/shop/purchase') {
+    $currentUser = $authMiddleware->authenticate(); $profileCustomizationController->purchase($currentUser); return;
+}
+
 if ($requestMethod === 'POST' && $route === '/api/assistant/query') {
     $currentUser = $authMiddleware->authenticate();
     $assistantController->query($currentUser);

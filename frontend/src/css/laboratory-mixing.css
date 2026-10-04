@@ -1,0 +1,97 @@
+.escena-mezcla {
+  min-height: 190px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 12px;
+  perspective: 500px;
+}
+
+.vaso-mezcla {
+  position: relative;
+  width: 126px;
+  height: 150px;
+  overflow: hidden;
+  border: 3px solid #9bbfc5;
+  border-top: 0;
+  border-radius: 0 0 22px 22px;
+  background: linear-gradient(90deg, rgba(255,255,255,.24), rgba(255,255,255,.06) 26%, rgba(255,255,255,.18) 75%, rgba(255,255,255,.3));
+  box-shadow: inset 0 0 18px rgba(255,255,255,.25), 0 8px 18px rgba(16,69,78,.15);
+  transform: rotateX(-4deg);
+}
+
+.vaso-mezcla::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: -3px;
+  right: -3px;
+  height: 7px;
+  border: 3px solid #9bbfc5;
+  border-radius: 50%;
+  background: rgba(255,255,255,.45);
+}
+
+.liquido-mezcla {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  left: 3px;
+  height: 0;
+  border-radius: 0 0 16px 16px;
+  background: var(--color-liquido, #9fc5c8);
+  opacity: .86;
+  transition: height .7s ease, background-color 1.2s ease, filter .5s ease;
+}
+
+.is-lleno .liquido-mezcla {
+  height: 72%;
+}
+
+.liquido-mezcla::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -15%;
+  width: 130%;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.42);
+  animation: superficie-mezcla 2.8s ease-in-out infinite alternate;
+}
+
+.hay-reaccion .liquido-mezcla {
+  filter: saturate(1.28);
+}
+
+.hay-reaccion .liquido-mezcla::after {
+  content: '•  ·  •';
+  position: absolute;
+  right: 12px;
+  bottom: 16px;
+  left: 12px;
+  color: rgba(255,255,255,.88);
+  font-size: 1.45rem;
+  letter-spacing: 11px;
+  animation: burbujas-mezcla 1.2s ease-in-out infinite alternate;
+}
+
+.is-mezclando .vaso-mezcla {
+  animation: agitar-vaso .55s ease-in-out infinite alternate;
+}
+
+@keyframes superficie-mezcla {
+  from { transform: translateX(-3%) rotate(-2deg); }
+  to { transform: translateX(3%) rotate(2deg); }
+}
+
+@keyframes burbujas-mezcla {
+  from { transform: translateY(6px); opacity: .45; }
+  to { transform: translateY(-7px); opacity: 1; }
+}
+
+@keyframes agitar-vaso {
+  from { transform: rotate(-3deg); }
+  to { transform: rotate(3deg); }
+}

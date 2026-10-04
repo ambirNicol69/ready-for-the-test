@@ -1,0 +1,319 @@
+.mini-calc-game {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(240px, 340px);
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-panel);
+  box-shadow: var(--sombra-suave);
+}
+
+.minigames-hub {
+  display: grid;
+  gap: 26px;
+}
+
+.minigame-subject h3 {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+}
+
+.minigame-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.minigame-card {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-panel);
+  box-shadow: var(--sombra-suave);
+}
+
+.minigame-card h4 {
+  font-size: 1.08rem;
+}
+
+.minigame-card p {
+  min-height: 42px;
+  color: var(--color-texto-suave);
+}
+
+.minigame-subject-tag {
+  color: var(--primario-profundo);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mini-calc-summary,
+.mini-calc-prompt,
+.mini-calc-status,
+.mini-calc-records,
+.mini-calc-actions {
+  grid-column: 1 / -1;
+}
+
+.mini-quiz-game {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-panel);
+  box-shadow: var(--sombra-suave);
+}
+
+.mini-quiz-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.conversion-race-track {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 4px 2px;
+}
+
+.equation-workbench {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.equation-workbench-stage {
+  display: grid;
+  gap: 7px;
+  align-content: center;
+  min-height: 82px;
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-panel-alt);
+  text-align: center;
+}
+
+.equation-stage-label {
+  color: var(--color-texto-suave);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.equation-workbench-stage strong {
+  font-size: clamp(0.9rem, 2vw, 1.15rem);
+}
+
+.equation-workbench-operation,
+.equation-workbench-intermediate,
+.equation-workbench-division {
+  opacity: 0.42;
+  transform: translateY(6px);
+}
+
+.equation-workbench.is-revealed .equation-workbench-operation,
+.equation-workbench.is-revealed .equation-workbench-intermediate,
+.equation-workbench.is-revealed .equation-workbench-division {
+  animation: equation-step-in 420ms ease-out forwards;
+}
+
+.equation-workbench.is-revealed .equation-workbench-intermediate { animation-delay: 180ms; }
+.equation-workbench.is-revealed .equation-workbench-division { animation-delay: 360ms; }
+
+@keyframes equation-step-in {
+  to { opacity: 1; transform: translateY(0); border-color: var(--primario); }
+}
+
+.conversion-race-lane {
+  position: relative;
+  height: 52px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background: repeating-linear-gradient(135deg, var(--color-panel-alt) 0 12px, var(--color-panel) 12px 24px);
+}
+
+.conversion-race-runner,
+.conversion-race-finish {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  font-size: 1.55rem;
+}
+
+.conversion-race-runner {
+  left: 4%;
+  transition: left 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.conversion-race-finish {
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.conversion-race-label {
+  color: var(--color-texto-suave);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conversion-race-runner {
+    transition: none;
+  }
+
+  .equation-workbench.is-revealed .equation-workbench-operation,
+  .equation-workbench.is-revealed .equation-workbench-intermediate,
+  .equation-workbench.is-revealed .equation-workbench-division {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    border-color: var(--primario);
+  }
+}
+
+.mini-quiz-choice {
+  min-height: 60px;
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-boton);
+  color: var(--color-texto);
+  cursor: pointer;
+  font-size: 0.96rem;
+  transition: var(--transicion);
+}
+
+.mini-quiz-choice:hover:not(:disabled) {
+  border-color: var(--primario);
+  background: var(--primario-tinte);
+}
+
+.mini-quiz-choice:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.mini-calc-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+}
+
+.mini-calc-prompt {
+  display: grid;
+  gap: 8px;
+  min-height: 116px;
+  align-content: center;
+  justify-items: center;
+  padding: 18px;
+  border-radius: var(--radio);
+  background: var(--primario-tinte);
+  text-align: center;
+}
+
+.mini-calc-label {
+  color: var(--primario-profundo);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.mini-calc-prompt strong {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+}
+
+.mini-calc-display {
+  grid-column: 1;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-panel-alt);
+  color: var(--color-texto);
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  text-align: right;
+}
+
+.mini-calc-keypad {
+  grid-column: 2;
+  grid-row: 3 / span 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mini-calc-key {
+  min-height: 48px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  background: var(--color-boton);
+  color: var(--color-texto);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: var(--transicion);
+}
+
+.mini-calc-key:hover {
+  border-color: var(--primario);
+  background: var(--primario-tinte);
+}
+
+.mini-calc-status {
+  min-height: 26px;
+  color: var(--color-texto-suave);
+  text-align: center;
+}
+
+.mini-calc-records {
+  color: var(--color-texto-suave);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.mini-calc-actions {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .minigame-cards,
+  .mini-quiz-choices,
+  .equation-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-calc-game {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-calc-display,
+  .mini-calc-keypad {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .mini-calc-key {
+    min-height: 52px;
+  }
+}

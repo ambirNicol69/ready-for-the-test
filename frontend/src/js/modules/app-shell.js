@@ -2,19 +2,23 @@ import { getElement, el, clearChildren } from '../utils/dom-helpers.js';
 import { on } from '../utils/events.js';
 import { session } from './session.js';
 import { navigate, currentHash } from './router.js';
+import {
+  applyAccentColor, buildProfileAvatar, readCustomization, saveLocalCustomization,
+} from '../utils/profile-identity.js';
+import { getCustomization } from '../services/profile-service.js';
 
 const THEME_KEY = 'rft_tema';
 const NAV_ITEMS = [
-  { hash: '#/perfil', label: 'Mi perfil' },
-  { hash: '#/calculadora', label: 'Calculadora' },
+  { hash: '#/lecciones', label: 'Lecciones' },
+  { hash: '#/juegos', label: 'Minijuegos' },
   { hash: '#/laboratorio', label: 'Laboratorio' },
   { hash: '#/catalogo', label: 'Catálogo' },
-  { hash: '#/mezclas', label: 'Mezclas' },
-  { hash: '#/identificacion', label: 'Identificación' },
   { hash: '#/salas', label: 'Salas' },
+  { hash: '#/clases', label: 'Salón de clase' },
 ];
 
 let isRendered = false;
+let customizationLoadId = null;
 
 export function renderShell() {
   isRendered = true;
@@ -29,20 +33,49 @@ function refreshHeaderUi() {
     return;
   }
   const header = getElement('appHeader');
+  if (session.user) {
+    applyAccentColor(readCustomization(session.user.id).accent_color);
+    loadHeaderCustomization(session.user.id);
+  } else {
+    customizationLoadId = null;
+  }
   header.replaceChildren(buildHeader());
+}
+
+function loadHeaderCustomization(userId) {
+  if (customizationLoadId === userId) return;
+  customizationLoadId = userId;
+  getCustomization().then((settings) => {
+    if (session.user?.id !== userId) return;
+    saveLocalCustomization(userId, settings);
+    applyAccentColor(settings.accent_color);
+    getElement('appHeader').replaceChildren(buildHeader());
+  }).catch(() => {});
 }
 
 function buildHeader() {
   const header = el('header', 'app-header');
 
   const brand = el('a', 'app-brand');
-  brand.href = '#/perfil';
-  brand.appendChild(el('span', 'app-brand-icon', '🧪'));
-  brand.appendChild(el('span', '', 'Ready for the Test?'));
+  brand.href = '#/inicio';
+  const logo = el('img', 'app-brand-logo');
+  logo.src = new URL('../../assets/images/logocontitulo.jpeg', import.meta.url).href;
+  logo.alt = 'Ready for the Test?';
+  brand.appendChild(logo);
 
   const nav = el('nav', 'app-nav');
   if (session.isLogged) {
-    for (const item of NAV_ITEMS) {
+    const items = session.isTeacher
+      ? [
+        { hash: '#/inicio', label: 'Inicio' },
+        { hash: '#/salas', label: 'Crear sala' },
+        { hash: '#/clases', label: 'Salón de clase' },
+      ]
+      : session.isStudent ? [
+        ...NAV_ITEMS.filter((item) => item.hash !== '#/clases'),
+        { hash: '#/clases', label: 'Mis clases' },
+      ] : [];
+    for (const item of items) {
       nav.appendChild(buildNavLink(item));
     }
   }
@@ -50,7 +83,9 @@ function buildHeader() {
   const right = el('div', 'app-header-derecha');
   right.appendChild(buildThemeButton());
   if (session.isLogged) {
-    right.appendChild(buildScorePill());
+    if (session.isStudent) {
+      right.appendChild(buildScorePill());
+    }
     right.appendChild(buildSessionPill());
     right.appendChild(buildLogoutButton());
   } else {
@@ -87,7 +122,11 @@ function buildScorePill() {
 }
 
 function buildSessionPill() {
-  const pill = el('span', 'session-pill');
+  const pill = el('button', 'session-pill');
+  pill.type = 'button';
+  pill.title = 'Abrir mi perfil';
+  pill.addEventListener('click', () => navigate('#/perfil'));
+  pill.appendChild(buildProfileAvatar(session.user, 'profile-avatar profile-avatar-header'));
   pill.appendChild(el('span', '', session.user.full_name.split(' ')[0]));
   return pill;
 }
@@ -112,7 +151,9 @@ function buildLinkButton(label, hash, className) {
 function markActiveRoute(hash) {
   const links = document.querySelectorAll('.nav-link');
   for (const link of links) {
-    link.classList.toggle('is-active', link.getAttribute('data-ruta') === hash);
+    const route = link.getAttribute('data-ruta');
+    const isGameRoute = route === '#/juegos' && hash.startsWith('#/juegos/');
+    link.classList.toggle('is-active', route === hash || isGameRoute);
   }
 }
 

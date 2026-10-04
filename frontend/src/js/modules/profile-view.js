@@ -5,17 +5,21 @@ import * as assistant from '../services/assistant-service.js';
 import * as lab from '../services/lab-service.js';
 import * as calculator from '../services/calculator-service.js';
 import { session } from './session.js';
+import { renderProfileCustomization } from './profile-customization-view.js';
+import { buildProfileAvatar } from '../utils/profile-identity.js';
 
 export function renderProfile(container) {
   clearChildren(container);
   container.appendChild(createViewHeader('Mi perfil', 'Resumen de tu actividad en la plataforma.'));
 
   const intro = el('section', 'cajon');
+  intro.appendChild(buildProfileAvatar(session.user));
   intro.appendChild(el('h3', '', session.user.full_name));
   intro.appendChild(el('p', '', session.user.email));
-  intro.appendChild(el('span', 'badge badge-ambar', session.user.role === 'docente' ? 'Docente' : 'Estudiante'));
-  intro.appendChild(el('p', '', `⭐ ${session.user.points} puntos`));
+  intro.appendChild(el('span', 'badge badge-ambar', getRoleLabel(session.user.role)));
+  if (session.isStudent) intro.appendChild(el('p', '', `⭐ ${session.user.points} puntos`));
   container.appendChild(intro);
+  renderProfileCustomization(container);
 
   const statsGrid = el('div', 'stat-grid');
   statsGrid.id = 'statPerfil';
@@ -29,6 +33,11 @@ export function renderProfile(container) {
   container.appendChild(historyCard);
 
   loadProfileData();
+}
+
+function getRoleLabel(role) {
+  const labels = { docente: 'Docente', estudiante: 'Estudiante', administrador: 'Administrador' };
+  return labels[role] || `Rol: ${role}`;
 }
 
 async function loadProfileData() {
@@ -64,7 +73,7 @@ function renderStats(grid, context) {
     { value: context.experiments, label: 'Experimentos' },
     { value: context.reactions, label: 'Reacciones' },
     { value: context.quizzes, label: 'Exámenes' },
-    { value: context.points, label: 'Puntos' },
+    ...(session.isStudent ? [{ value: context.points, label: 'Puntos' }] : []),
   ];
   for (const stat of stats) {
     const box = el('div', 'stat');
