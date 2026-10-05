@@ -58,12 +58,10 @@ function buildHeader() {
 
   const brand = el('a', 'app-brand');
   brand.href = '#/inicio';
-  const logo = el('img', 'app-brand-logo');
-  logo.src = new URL('../../assets/images/logocontitulo.jpeg', import.meta.url).href;
-  logo.alt = 'Ready for the Test?';
-  brand.appendChild(logo);
+  brand.appendChild(el('span', 'app-brand-name', 'Ready4TheTest?'));
 
   const nav = el('nav', 'app-nav');
+  nav.setAttribute('aria-label', session.isLogged ? 'Navegación principal' : 'Secciones de inicio');
   if (session.isLogged) {
     const items = session.isTeacher
       ? [
@@ -78,6 +76,9 @@ function buildHeader() {
     for (const item of items) {
       nav.appendChild(buildNavLink(item));
     }
+  } else if (currentHash() === '#/inicio') {
+    nav.appendChild(buildScrollNavLink('Materias', 'inicio-materias'));
+    nav.appendChild(buildScrollNavLink('Herramientas', 'inicio-recursos'));
   }
 
   const right = el('div', 'app-header-derecha');
@@ -103,6 +104,16 @@ function buildNavLink(item) {
   const link = el('button', `nav-link${item.hash === currentHash() ? ' is-active' : ''}`, item.label);
   link.setAttribute('data-ruta', item.hash);
   link.addEventListener('click', () => navigate(item.hash));
+  return link;
+}
+
+function buildScrollNavLink(label, targetId) {
+  const link = el('button', 'nav-link', label);
+  link.type = 'button';
+  link.addEventListener('click', () => {
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    document.getElementById(targetId)?.scrollIntoView({ behavior, block: 'start' });
+  });
   return link;
 }
 

@@ -26,6 +26,43 @@ export function joinRoomWithCode(code) {
   });
 }
 
+export function prepareLiveRoom(roomId, questionTimeSeconds) {
+  return request(`/api/quiz-rooms/${roomId}/live/prepare`, {
+    method: 'POST', body: { question_time_seconds: questionTimeSeconds },
+  });
+}
+
+export function startLiveRoom(roomId) {
+  return request(`/api/quiz-rooms/${roomId}/live/start`, { method: 'POST' });
+}
+
+export function getLiveRoomState(roomId) {
+  return request(`/api/quiz-rooms/${roomId}/live`);
+}
+
+export function advanceLiveRoom(roomId) {
+  return request(`/api/quiz-rooms/${roomId}/live/advance`, { method: 'POST' });
+}
+
+export function toggleLiveRoomPause(roomId) {
+  return request(`/api/quiz-rooms/${roomId}/live/pause`, { method: 'POST' });
+}
+
+export function finishLiveRoom(roomId) {
+  return request(`/api/quiz-rooms/${roomId}/live/finish`, { method: 'POST' });
+}
+
+export function getStudentLiveState(attemptId) {
+  return request(`/api/quiz-live/${attemptId}`);
+}
+
+export function submitLiveAnswer({ attemptId, questionId, optionPosition }) {
+  return request('/api/quiz-live/answer', {
+    method: 'POST',
+    body: { attempt_id: attemptId, question_id: questionId, option_position: optionPosition },
+  });
+}
+
 export function autoRoomTopics() {
   return request('/api/quiz-rooms/auto/topics');
 }

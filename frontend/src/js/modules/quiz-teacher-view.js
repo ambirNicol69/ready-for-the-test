@@ -4,6 +4,7 @@ import { showToast } from '../utils/toast.js';
 import { isRequired, isInRange } from '../utils/validators.js';
 import * as quiz from '../services/quiz-service.js';
 import { buildAutoCreator } from './quiz-auto-creator.js';
+import { createLiveHostPanel } from './quiz-live-teacher-view.js';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 const MIN_QUESTIONS = 1;
@@ -228,9 +229,22 @@ function buildRoomRow(room) {
   const actions = el('div', 'vista-acciones');
   const detailsButton = el('button', 'btn btn-contorno', 'Ver preguntas');
   detailsButton.addEventListener('click', () => toggleRoomDetails(card, room.id, detailsButton));
+  const liveButton = el('button', 'btn btn-ambar', 'Competencia en vivo');
+  let livePanel = null;
+  liveButton.addEventListener('click', () => {
+    if (livePanel) {
+      livePanel.dispose(); livePanel.element.remove(); livePanel = null;
+      liveButton.textContent = 'Competencia en vivo';
+      return;
+    }
+    livePanel = createLiveHostPanel(room);
+    card.appendChild(livePanel.element);
+    liveButton.textContent = 'Cerrar panel en vivo';
+  });
   const deleteButton = el('button', 'btn btn-peligro', 'Eliminar');
   deleteButton.addEventListener('click', () => deleteRoomRow(room.id));
   actions.appendChild(detailsButton);
+  actions.appendChild(liveButton);
   actions.appendChild(deleteButton);
   card.appendChild(actions);
   return card;

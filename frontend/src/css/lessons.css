@@ -1,10 +1,40 @@
+.lesson-search {
+  width: min(100%, 460px);
+  min-height: 44px;
+  margin: 8px 0 18px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-panel);
+  color: var(--color-texto);
+  font: inherit;
+}
+
+.lesson-search:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primario) 30%, transparent);
+  border-color: var(--primario);
+}
+
+.lesson-empty {
+  grid-column: 1 / -1;
+}
+
 .lesson-card {
   min-height: 245px;
   justify-content: space-between;
 }
 
+.lesson-card.lesson-matematicas { --card-accent: #2563eb; }
+.lesson-card.lesson-fisica { --card-accent: #d97706; }
+.lesson-card.lesson-quimica { --card-accent: #059669; }
+
 .lesson-card .badge {
   align-self: flex-start;
+}
+
+.lesson-subject {
+  background: color-mix(in srgb, var(--card-accent) 13%, white);
+  color: var(--card-accent);
 }
 
 .lesson-card .btn {

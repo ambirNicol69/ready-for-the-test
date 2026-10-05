@@ -90,7 +90,7 @@ function handleRoute() {
   }
   let view = AUTHED_ROUTES[hash];
 
-  if (view && !session.isLogged) {
+  if (view && !session.isLogged && hash !== '#/inicio') {
     location.hash = '#/login';
     return;
   }
@@ -121,6 +121,7 @@ function handleRoute() {
   }
 
   clearChildren(container);
+  container.classList.toggle('welcome-page', hash === '#/inicio' && !session.isTeacher);
   if (view) {
     view(container);
   } else {

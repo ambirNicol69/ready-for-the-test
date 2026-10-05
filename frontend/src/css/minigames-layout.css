@@ -1,0 +1,82 @@
+﻿.mini-calc-game {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(240px, 340px);
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-panel);
+  box-shadow: var(--sombra-suave);
+}
+
+.minigames-hub {
+  display: grid;
+  gap: 26px;
+}
+
+.minigame-subject h3 {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+}
+
+.minigame-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.minigame-card {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-panel);
+  box-shadow: var(--sombra-suave);
+}
+
+.minigame-card h4 {
+  font-size: 1.08rem;
+}
+
+.minigame-card p {
+  min-height: 42px;
+  color: var(--color-texto-suave);
+}
+
+.minigame-subject-tag {
+  color: var(--primario-profundo);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mini-calc-summary,
+.mini-calc-prompt,
+.mini-calc-status,
+.mini-calc-records,
+.mini-calc-actions {
+  grid-column: 1 / -1;
+}
+
+.mini-quiz-game {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-panel);
+  box-shadow: var(--sombra-suave);
+}
+
+.mini-quiz-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+

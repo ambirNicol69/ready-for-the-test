@@ -4,22 +4,22 @@ const SUBJECTS = [
   {
     name: 'Matemáticas',
     games: [
-      ['Reto Calculadora', 'Resuelve operaciones con la calculadora integrada.', '#/juegos/calculadora'],
-      ['Ordena la ecuación', 'Despeja x y observa cómo se transforma cada ecuación paso a paso.', '#/juegos/ecuacion'],
+      ['Reto Calculadora', 'Usa el teclado del juego y recibe una animación al resolver cada reto.', '#/juegos/calculadora'],
+      ['Ordena la ecuación', 'Construye el orden correcto con fichas de operaciones antes de comprobar.', '#/juegos/ecuacion'],
     ],
   },
   {
     name: 'Física',
     games: [
       ['Carrera de conversiones', 'Responde conversiones y avanza por la pista hasta la meta.', '#/juegos/conversiones'],
-      ['¿Qué instrumento usarías?', 'Elige el instrumento adecuado para cada medición.', '#/juegos/instrumentos'],
+      ['¿Qué instrumento usarías?', 'Acerca el instrumento correcto al objeto que quieres medir.', '#/juegos/instrumentos'],
     ],
   },
   {
     name: 'Química',
     games: [
-      ['Sustancia misteriosa', 'Identifica materiales según sus propiedades.', '#/juegos/sustancias'],
-      ['Mezcla segura', 'Predice reacciones en el laboratorio virtual.', '#/juegos/mezclas'],
+      ['Sustancia misteriosa', 'Revela pistas del laboratorio y descubre la muestra oculta.', '#/juegos/sustancias'],
+      ['Mezcla segura', 'Combina reactivos virtuales y observa la reacción que predices.', '#/juegos/mezclas'],
     ],
   },
 ];

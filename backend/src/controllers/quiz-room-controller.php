@@ -6,7 +6,8 @@ final class QuizRoomController
 {
     public function __construct(
         private readonly QuizRoomService $service,
-        private readonly QuizAutoService $autoService
+        private readonly QuizAutoService $autoService,
+        private readonly QuizLiveService $liveService
     ) {
     }
 
@@ -67,15 +68,79 @@ final class QuizRoomController
     {
         $this->assertStudent($user);
         $requestBody = readJsonBody();
-        $result = $this->service->joinRoom($user->id, trim($requestBody['code'] ?? ''));
+        $code = trim($requestBody['code'] ?? '');
+        $result = $this->liveService->joinIfPrepared($user->id, $code);
+        if ($result === null) $result = $this->service->joinRoom($user->id, $code);
 
-        jsonResponse(201, true, $result, 'Sala abierta');
+        jsonResponse(201, true, $result, ($result['mode'] ?? '') === 'live' ? 'Competencia en vivo abierta' : 'Sala abierta');
+    }
+
+    public function prepareLive(User $user, int $roomId): void
+    {
+        $this->assertTeacher($user);
+        $body = readJsonBody();
+        $this->liveService->prepare($user->id, $roomId, (int) ($body['question_time_seconds'] ?? 20));
+        jsonResponse(200, true, null, 'Sala de espera preparada');
+    }
+
+    public function startLive(User $user, int $roomId): void
+    {
+        $this->assertTeacher($user);
+        $this->liveService->start($user->id, $roomId);
+        jsonResponse(200, true, null, 'Competencia iniciada');
+    }
+
+    public function liveState(User $user, int $roomId): void
+    {
+        $this->assertTeacher($user);
+        jsonResponse(200, true, $this->liveService->hostState($user->id, $roomId), 'Estado en vivo obtenido');
+    }
+
+    public function advanceLive(User $user, int $roomId): void
+    {
+        $this->assertTeacher($user);
+        $this->liveService->advance($user->id, $roomId);
+        jsonResponse(200, true, null, 'Partida avanzada');
+    }
+
+    public function toggleLivePause(User $user, int $roomId): void
+    {
+        $this->assertTeacher($user);
+        $this->liveService->togglePause($user->id, $roomId);
+        jsonResponse(200, true, null, 'Estado de pausa actualizado');
+    }
+
+    public function finishLive(User $user, int $roomId): void
+    {
+        $this->assertTeacher($user);
+        $this->liveService->finish($user->id, $roomId);
+        jsonResponse(200, true, null, 'Competencia finalizada');
+    }
+
+    public function studentLiveState(User $user, int $attemptId): void
+    {
+        $this->assertStudent($user);
+        jsonResponse(200, true, $this->liveService->studentState($user->id, $attemptId), 'Estado en vivo obtenido');
+    }
+
+    public function answerLive(User $user): void
+    {
+        $this->assertStudent($user);
+        $body = readJsonBody();
+        $result = $this->liveService->answer(
+            $user->id,
+            (int) ($body['attempt_id'] ?? 0),
+            (int) ($body['question_id'] ?? 0),
+            (int) ($body['option_position'] ?? 0)
+        );
+        jsonResponse(200, true, $result, 'Respuesta registrada');
     }
 
     public function submit(User $user): void
     {
         $this->assertStudent($user);
         $requestBody = readJsonBody();
+        $this->liveService->assertPracticeAttempt($user->id, (int) ($requestBody['attempt_id'] ?? 0));
         $result = $this->service->submitAnswers(
             $user->id,
             (int) ($requestBody['attempt_id'] ?? 0),

@@ -154,6 +154,54 @@ if ($requestMethod === 'POST' && $route === '/api/quiz-rooms/join') {
     return;
 }
 
+if ($requestMethod === 'POST' && matchRoute('/api/quiz-rooms/{id}/live/prepare', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->prepareLive($currentUser, (int) $routeParams['id']);
+    return;
+}
+
+if ($requestMethod === 'POST' && matchRoute('/api/quiz-rooms/{id}/live/start', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->startLive($currentUser, (int) $routeParams['id']);
+    return;
+}
+
+if ($requestMethod === 'GET' && matchRoute('/api/quiz-rooms/{id}/live', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->liveState($currentUser, (int) $routeParams['id']);
+    return;
+}
+
+if ($requestMethod === 'POST' && matchRoute('/api/quiz-rooms/{id}/live/advance', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->advanceLive($currentUser, (int) $routeParams['id']);
+    return;
+}
+
+if ($requestMethod === 'POST' && matchRoute('/api/quiz-rooms/{id}/live/pause', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->toggleLivePause($currentUser, (int) $routeParams['id']);
+    return;
+}
+
+if ($requestMethod === 'POST' && matchRoute('/api/quiz-rooms/{id}/live/finish', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->finishLive($currentUser, (int) $routeParams['id']);
+    return;
+}
+
+if ($requestMethod === 'GET' && matchRoute('/api/quiz-live/{attemptId}', $route, $routeParams)) {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->studentLiveState($currentUser, (int) $routeParams['attemptId']);
+    return;
+}
+
+if ($requestMethod === 'POST' && $route === '/api/quiz-live/answer') {
+    $currentUser = $authMiddleware->authenticate();
+    $quizRoomController->answerLive($currentUser);
+    return;
+}
+
 if ($requestMethod === 'GET' && matchRoute('/api/quiz-rooms/{id}', $route, $routeParams)) {
     $currentUser = $authMiddleware->authenticate();
     $quizRoomController->get($currentUser, (int) $routeParams['id']);

@@ -4,14 +4,18 @@ import { showToast } from '../utils/toast.js';
 import { isRequired } from '../utils/validators.js';
 import * as quiz from '../services/quiz-service.js';
 import { session } from './session.js';
+import { renderLiveStudent } from './quiz-live-student-view.js';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 let attempt = null;
 let answers = {};
 let currentIndex = 0;
+let activeLiveGame = null;
 
 export function renderQuizStudent(container) {
+  activeLiveGame?.dispose();
+  activeLiveGame = null;
   container.appendChild(createViewHeader(
     'Salas de examen',
     'Únete con el código que te compartió tu docente.'
@@ -50,7 +54,18 @@ export function renderQuizStudent(container) {
     }
     joinButton.disabled = true;
     try {
-      attempt = await quiz.joinRoomWithCode(code);
+      const joined = await quiz.joinRoomWithCode(code);
+      if (joined.mode === 'live') {
+        joinCard.hidden = true;
+        activeLiveGame = renderLiveStudent(playZone, joined, () => {
+          activeLiveGame = null;
+          joinCard.hidden = false;
+          clearChildren(playZone);
+          codeField.input.value = '';
+        });
+        return;
+      }
+      attempt = joined;
       answers = {};
       currentIndex = 0;
       renderPlay(playZone);

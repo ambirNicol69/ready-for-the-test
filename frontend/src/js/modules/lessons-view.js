@@ -13,26 +13,49 @@ export function renderLessons(container) {
   destroyPlayer();
   clearChildren(container);
   container.appendChild(createViewHeader('Lecciones', 'Aprende paso a paso. Completa cada fase para desbloquear la siguiente.'));
+  const search = el('input', 'lesson-search');
+  search.type = 'search';
+  search.placeholder = 'Buscar por tema o materia…';
+  search.setAttribute('aria-label', 'Buscar lecciones por tema o materia');
   const list = el('div', 'rejilla');
+  let currentProgress = {};
   list.appendChild(el('p', 'estado-vacio', 'Cargando lecciones…'));
-  container.appendChild(list);
-  progressApi.getProgress().then((progress) => renderLessonCards(list, progress))
+  container.append(search, list);
+  search.addEventListener('input', () => {
+    renderLessonCards(list, currentProgress, search.value);
+  });
+  progressApi.getProgress().then((progress) => {
+    currentProgress = progress;
+    renderLessonCards(list, progress, search.value);
+  })
     .catch((error) => list.replaceChildren(createAlert(error.message)));
 }
 
-function renderLessonCards(list, progress) {
+function renderLessonCards(list, progress, query = '') {
   clearChildren(list);
-  LESSONS.forEach((lesson) => {
+  const normalizedQuery = normalizeText(query.trim());
+  const filteredLessons = LESSONS.filter((lesson) => normalizeText(`${lesson.title} ${lesson.subject}`).includes(normalizedQuery));
+  if (!filteredLessons.length) {
+    list.appendChild(el('p', 'estado-vacio lesson-empty', 'No se encontraron lecciones. Prueba con otro tema o materia.'));
+    return;
+  }
+  filteredLessons.forEach((lesson) => {
     const phase = Number(progress[lesson.slug] || 0);
-    const card = el('article', 'tarjeta lesson-card');
+    const subjectClass = lesson.slug.startsWith('matematicas-') ? 'lesson-matematicas'
+      : lesson.slug.startsWith('fisica-') ? 'lesson-fisica' : 'lesson-quimica';
+    const card = el('article', `tarjeta lesson-card ${subjectClass}`);
     card.append(
-      el('span', 'badge badge-primario', lesson.subject),
+      el('span', 'badge lesson-subject', lesson.subject),
       el('h3', '', lesson.title),
       el('p', '', phase === 4 ? 'Lección completada' : `${Math.min(phase, 3)} de 4 fases completadas`),
       button(phase === 4 ? 'Repasar lección' : phase ? 'Continuar lección' : 'Comenzar lección', () => showLesson(lesson, phase)),
     );
     list.appendChild(card);
   });
+}
+
+function normalizeText(value) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
 }
 
 function showLesson(lesson, progress, selectedPhase = Math.min(progress, 3)) {

@@ -30,10 +30,9 @@ function buildGame(config) {
   summary.append(progress, score, streak, timer);
 
   const progressTrack = config.createProgressTrack?.();
-  const scene = config.createScene?.();
 
   const prompt = el('div', 'mini-calc-prompt');
-  const choices = el('div', 'mini-quiz-choices');
+  const choices = el('div', `mini-quiz-choices ${config.choiceContainerClass || ''}`.trim());
   const status = el('p', 'mini-calc-status', 'Elige una respuesta.');
   const records = el('p', 'mini-calc-records', 'Cargando tus récords...');
   const actions = el('div', 'mini-calc-actions');
@@ -43,16 +42,19 @@ function buildGame(config) {
   actions.append(next);
   root.append(summary);
   if (progressTrack) root.append(progressTrack.element);
-  if (scene) root.append(scene.element);
   root.append(prompt, choices, status, records, actions);
-  return { root, progress, score, streak, timer, prompt, choices, status, records, next, progressTrack, scene };
+  return { root, progress, score, streak, timer, prompt, choices, status, records, next, progressTrack };
 }
 
 function startGame(game, config) {
   const state = { round: 0, points: 0, streak: 0, attemptToken: null, startedAt: Date.now() };
   game.choices.addEventListener('click', (event) => chooseAnswer(event, state, game, config));
   game.next.addEventListener('click', () => {
-    if (game.next.dataset.action === 'next') loadQuestion(state, game, config);
+    if (game.next.dataset.action === 'check-custom') {
+      config.checkCustomAnswer(state, game, (correct) => answerIndex(
+        correct ? state.question.correctIndex : -1, state, game, config,
+      ));
+    } else if (game.next.dataset.action === 'next') loadQuestion(state, game, config);
     else if (game.next.dataset.action === 'retry-save') saveAttempt(state, game, config);
     else if (game.next.dataset.action === 'replay') restartGame(state, game, config);
   });
@@ -104,10 +106,10 @@ function loadQuestion(state, game, config) {
   if (state.round >= TOTAL_QUESTIONS) return finishGame(state, game, config);
   game.progressTrack?.update(state.round);
   state.question = config.createQuestion();
-  game.scene?.showQuestion(state.question);
   game.progress.textContent = `Reto ${state.round + 1} de ${TOTAL_QUESTIONS}`;
-  game.prompt.replaceChildren(el('span', 'mini-calc-label', 'ELIGE LA RESPUESTA'), el('strong', '', state.question.prompt));
-  game.choices.replaceChildren(...state.question.choices.map((choice, index) => createChoice(choice, index)));
+  game.prompt.replaceChildren(el('span', 'mini-calc-label', config.interactionLabel || 'ELIGE LA RESPUESTA'), el('strong', '', state.question.prompt));
+  if (config.renderChoices) config.renderChoices(game.choices, state.question, state);
+  else game.choices.replaceChildren(...state.question.choices.map((choice, index) => createChoice(choice, index)));
   game.status.textContent = 'Elige una respuesta.';
   game.next.hidden = true;
   game.next.dataset.action = '';
@@ -121,12 +123,23 @@ function createChoice(label, index) {
 }
 
 function chooseAnswer(event, state, game, config) {
+  if (config.handleChoiceClick) {
+    config.handleChoiceClick(event, state, game);
+    return;
+  }
   const choice = event.target.closest('[data-index]');
   if (!choice || game.next.dataset.action) return;
-  if (Number(choice.dataset.index) !== state.question.correctIndex) {
+  answerIndex(Number(choice.dataset.index), state, game, config);
+}
+
+function answerIndex(index, state, game, config) {
+  if (game.next.dataset.action === 'next' || game.next.dataset.action === 'replay') return;
+  const isCorrect = index === state.question.correctIndex;
+  config.onAnswerResult?.(isCorrect, index, state, game);
+  if (!isCorrect) {
     state.streak = 0;
     game.streak.textContent = 'Racha: 0';
-    game.status.textContent = 'Esa no es. Inténtalo de nuevo; puedes revisar las opciones.';
+    game.status.textContent = config.incorrectMessage || 'Esa no es. Inténtalo de nuevo; puedes revisar las opciones.';
     return;
   }
   awardAnswer(state, game, config);
@@ -140,7 +153,6 @@ function awardAnswer(state, game, config) {
   game.score.textContent = `Puntos: ${state.points}`;
   game.streak.textContent = `Racha: ${state.streak}`;
   game.progressTrack?.update(state.round);
-  game.scene?.revealAnswer(state.question);
   game.choices.querySelectorAll('button').forEach((button) => { button.disabled = true; });
   if (state.round === TOTAL_QUESTIONS) return finishGame(state, game, config);
   game.status.textContent = bonus ? `¡Correcto! Bonificación de racha: +${bonus} puntos.` : '¡Correcto! +10 puntos.';

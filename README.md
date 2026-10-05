@@ -45,8 +45,16 @@ Endpoints disponibles (base: `backend/public/index.php`):
 | DELETE | `/api/quiz-rooms/{id}`            | Eliminar sala propia | Sí (docente) |
 | GET    | `/api/quiz-rooms/auto/topics`     | Temas disponibles para salas automáticas | Sí (docente) |
 | POST   | `/api/quiz-rooms/auto`            | Crear sala automática: `title`, `topic`, `question_count` (1–10), `points_value` (1–100) | Sí (docente) |
-| POST   | `/api/quiz-rooms/join`            | Unirse con `code` (devuelve preguntas sin respuestas) | Sí (estudiante) |
-| POST   | `/api/quiz-answers`               | Enviar `attempt_id` + `answers` (`question_id`, `option_index`) y calificar | Sí (estudiante) |
+| POST   | `/api/quiz-rooms/join`            | Unirse con `code` (modo individual o sala de espera en vivo, según la sala) | Sí (estudiante) |
+| POST   | `/api/quiz-answers`               | Enviar respuestas de una sala individual | Sí (estudiante) |
+| POST | `/api/quiz-rooms/{id}/live/prepare` | Abrir la sala de espera y elegir el temporizador (15, 20, 30, 45 o 60 s) | Sí (docente) |
+| POST | `/api/quiz-rooms/{id}/live/start` | Iniciar la competencia | Sí (docente) |
+| GET | `/api/quiz-rooms/{id}/live` | Consultar participantes, pregunta y marcador en vivo | Sí (docente) |
+| POST | `/api/quiz-rooms/{id}/live/advance` | Revelar la respuesta o avanzar la partida | Sí (docente) |
+| POST | `/api/quiz-rooms/{id}/live/pause` | Pausar o reanudar el temporizador | Sí (docente) |
+| POST | `/api/quiz-rooms/{id}/live/finish` | Finalizar la competencia y guardar puntos | Sí (docente) |
+| GET | `/api/quiz-live/{attemptId}` | Consultar el estado sincronizado de una participación | Sí (estudiante) |
+| POST | `/api/quiz-live/answer` | Registrar una respuesta de la pregunta activa | Sí (estudiante) |
 | GET/POST | `/api/classrooms` | Listar salones del usuario o crear salón (docente) | Sí |
 | POST | `/api/classrooms/{id}/students` | Añadir al salón un estudiante registrado por correo (docente) | Sí |
 | POST | `/api/classrooms/{id}/assignments` | Publicar instrucciones, fecha y archivo (docente) | Sí |
@@ -71,6 +79,17 @@ protegidos.
 3. Importa luego `backend/database/seed.sql` (carga sustancias, reactivos y reacciones ya existentes).
 
 Si ya tienes una base de datos creada, importa una sola vez `backend/database/classrooms-migration.sql` para añadir las tablas del salón de clase. Importa también `backend/database/lessons-migration.sql` para habilitar el progreso de las lecciones, `backend/database/profile-shop-migration.sql` para guardar colores y avatares, y `backend/database/minigames-migration.sql` para guardar puntuaciones y tiempos de minijuegos. Si ya habías importado las migraciones de la tienda y de minijuegos, ejecuta una vez `backend/database/profile-avatar-shop-migration.sql` para retirar los accesorios antiguos, y `backend/database/minigame-attempt-token-migration.sql` para habilitar el guardado idempotente de puntuaciones.
+
+Para habilitar competencias en vivo en una base existente, importa una sola vez `backend/database/quiz-live-migration.sql`. En una instalación nueva, las tablas y columnas ya están incluidas en `backend/database/schema.sql`. El docente prepara la competencia antes de compartir el código; los estudiantes se unen a la sala de espera y el docente inicia la partida.
+
+### Probar una competencia en vivo
+
+1. Inicia Ready4TheTest? en el servidor local y abre la aplicación con una cuenta de docente.
+2. Crea o elige una sala, pulsa **Competencia en vivo**, define el tiempo por pregunta y prepara la sala.
+3. En otro navegador, perfil o dispositivo, inicia sesión con una cuenta de estudiante e ingresa el código que muestra el docente.
+4. Cuando aparezca el estudiante en la sala de espera del docente, pulsa **Iniciar competencia**. Las preguntas, el reloj, las respuestas y el marcador se sincronizan mediante el servidor.
+
+Cada navegador conserva una sola sesión iniciada. Para conectar docente y estudiante al mismo tiempo, usa dos perfiles de navegador, una ventana privada o dos dispositivos.
 
 Los archivos adjuntos admitidos son PDF, documentos y hojas de Office, y fotos JPG, PNG o WebP (máximo 15 MB). Se guardan en `frontend/uploads/classes`.
 

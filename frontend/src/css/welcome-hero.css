@@ -1,0 +1,215 @@
+﻿.welcome-page {
+  max-width: none;
+  padding: 0 clamp(16px, 4vw, 64px) 72px;
+}
+
+.app-brand {
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.app-brand-name {
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.welcome-landing {
+  width: min(100%, 1480px);
+  margin: 0 auto;
+}
+
+.welcome-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: clamp(540px, calc(100vh - 150px), 760px);
+  margin: 24px auto 0;
+  padding: clamp(28px, 6vw, 84px);
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background:
+    radial-gradient(ellipse at 88% 20%, var(--primario-tinte), transparent 42%),
+    linear-gradient(120deg, var(--color-panel-alt), var(--color-fondo));
+  box-shadow: var(--sombra-suave);
+}
+
+.welcome-slides,
+.welcome-slide,
+.welcome-hero::after {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.welcome-slides {
+  z-index: -2;
+}
+
+.welcome-slide {
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.welcome-slide.is-loaded.is-active {
+  opacity: 1;
+}
+
+.welcome-slide.is-unavailable {
+  display: none;
+}
+
+.welcome-hero::after {
+  z-index: -1;
+  content: '';
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--color-fondo) 82%, transparent) 0%,
+    color-mix(in srgb, var(--color-fondo) 76%, transparent) 52%,
+    color-mix(in srgb, var(--color-fondo) 58%, transparent) 100%);
+}
+
+.welcome-hero-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.7fr);
+  align-items: center;
+  gap: clamp(32px, 7vw, 100px);
+  width: 100%;
+}
+
+.welcome-copy {
+  max-width: 720px;
+  text-align: left;
+}
+
+.welcome-eyebrow {
+  margin-bottom: 18px;
+  color: var(--primario-profundo);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.welcome-copy h1 {
+  max-width: 760px;
+  margin: 0 0 20px;
+  font-size: clamp(2.7rem, 6.3vw, 5.7rem);
+  line-height: 0.99;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.welcome-lead {
+  max-width: 630px;
+  margin: 0;
+  color: var(--color-texto-suave);
+  font-size: clamp(1.04rem, 1.6vw, 1.25rem);
+  line-height: 1.65;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.welcome-actions a,
+.welcome-tools-copy > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  text-decoration: none;
+}
+
+.welcome-primary-action {
+  padding-inline: 24px;
+}
+
+.welcome-secondary-action {
+  background: color-mix(in srgb, var(--color-panel) 80%, transparent);
+}
+
+.welcome-showcase {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--color-borde) 76%, transparent);
+  border-radius: var(--radio-lg);
+  background: color-mix(in srgb, var(--color-panel) 89%, transparent);
+  box-shadow: var(--sombra);
+  backdrop-filter: blur(10px);
+}
+
+.welcome-showcase-title {
+  margin-bottom: 4px;
+  color: var(--color-texto-suave);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.welcome-subject {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-panel);
+}
+
+.welcome-subject-symbol {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radio-sm);
+  background: var(--subject-tint);
+  color: var(--subject-color);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.welcome-subject-name { font-weight: 700; }
+.welcome-subject-detail { color: var(--color-texto-suave); font-size: 0.82rem; }
+
+.welcome-subject-matematicas,
+.welcome-subject-card-matematicas { --subject-color: var(--primario-profundo); --subject-tint: var(--primario-tinte); }
+.welcome-subject-fisica,
+.welcome-subject-card-fisica { --subject-color: var(--ambar); --subject-tint: var(--ambar-tinte); }
+.welcome-subject-quimica,
+.welcome-subject-card-quimica { --subject-color: var(--verde); --subject-tint: var(--verde-tinte); }
+
+.welcome-carousel-controls {
+  position: absolute;
+  right: clamp(16px, 3vw, 36px);
+  bottom: clamp(16px, 3vw, 36px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome-carousel-controls[hidden] { display: none; }
+
+.welcome-carousel-button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 7px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-panel) 88%, transparent);
+  color: var(--color-texto);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.welcome-carousel-button:hover { background: var(--color-panel); }
+

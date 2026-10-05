@@ -1,0 +1,162 @@
+﻿
+.mini-quiz-choice {
+  min-height: 60px;
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-boton);
+  color: var(--color-texto);
+  cursor: pointer;
+  font-size: 0.96rem;
+  transition: var(--transicion);
+}
+
+.mini-quiz-choice:hover:not(:disabled) {
+  border-color: var(--primario);
+  background: var(--primario-tinte);
+}
+
+.mini-quiz-choice:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.mini-calc-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+}
+
+.mini-calc-prompt {
+  display: grid;
+  gap: 8px;
+  min-height: 116px;
+  align-content: center;
+  justify-items: center;
+  padding: 18px;
+  border-radius: var(--radio);
+  background: var(--primario-tinte);
+  text-align: center;
+}
+
+.mini-calc-label {
+  color: var(--primario-profundo);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.mini-calc-prompt strong {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+}
+
+.mini-calc-display {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-panel-alt);
+  color: var(--color-texto);
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  text-align: right;
+}
+
+.mini-calc-display-stage { grid-column: 1; display: grid; gap: 8px; align-content: start; }
+.mini-calc-display.is-updating { animation: calculator-screen-tick 180ms ease-out; }
+.mini-calc-display.is-correct { border-color: var(--primario); box-shadow: 0 0 0 3px var(--primario-tinte); animation: calculator-success 520ms ease-out; }
+.mini-calc-display.is-incorrect { border-color: #d97757; animation: instrument-shake 280ms ease-in-out; }
+.mini-calc-feedback { margin: 0; color: var(--primario-profundo); font-weight: 700; text-align: center; }
+.mini-calc-key:active { transform: scale(0.93); }
+.mini-calc-key:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
+.mini-calc-game.has-correct-answer .mini-calc-key { animation: calculator-key-celebrate 460ms ease-out both; animation-delay: var(--key-delay, 0ms); }
+@keyframes calculator-screen-tick { 50% { transform: scale(1.025); } }
+@keyframes calculator-success { 45% { transform: scale(1.045); } }
+@keyframes calculator-key-celebrate { 45% { transform: translateY(-4px) scale(1.07); border-color: var(--primario); background: var(--primario-tinte); } }
+
+.mini-calc-keypad {
+  grid-column: 2;
+  grid-row: 3 / span 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mini-calc-key {
+  min-height: 48px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  background: var(--color-boton);
+  color: var(--color-texto);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: var(--transicion);
+}
+
+.mini-calc-key:hover:not(:disabled) {
+  border-color: var(--primario);
+  background: var(--primario-tinte);
+}
+
+.mini-calc-key:disabled { cursor: default; opacity: 0.8; }
+
+.mini-calc-status {
+  min-height: 26px;
+  color: var(--color-texto-suave);
+  text-align: center;
+}
+
+.mini-calc-records {
+  color: var(--color-texto-suave);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.mini-calc-actions {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .minigame-cards,
+  .mini-quiz-choices,
+  .instrument-choice-grid,
+  .mystery-clue-grid,
+  .mystery-substance-options,
+  .mixing-answer-grid,
+  .equation-order-slots,
+  .equation-operation-tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-calc-game {
+    grid-template-columns: 1fr;
+  }
+
+  .mixing-lab-scene { grid-template-columns: minmax(76px, 1fr) 20px minmax(76px, 1fr); gap: 8px; padding: 12px; }
+  .mixing-beaker { grid-column: 1 / -1; }
+  .mini-calc-display-stage { grid-column: 1; }
+
+  .mini-calc-display,
+  .mini-calc-keypad {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .mini-calc-key {
+    min-height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-calc-display.is-updating,
+  .mini-calc-display.is-correct,
+  .mini-calc-display.is-incorrect,
+  .mini-calc-game.has-correct-answer .mini-calc-key { animation: none; }
+  .mini-calc-key { transition: none; }
+}

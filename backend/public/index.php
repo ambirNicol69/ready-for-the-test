@@ -31,6 +31,7 @@ require_once __DIR__ . '/../src/repositories/lab-experiment-repository.php';
 require_once __DIR__ . '/../src/repositories/quiz-room-repository.php';
 require_once __DIR__ . '/../src/repositories/quiz-question-repository.php';
 require_once __DIR__ . '/../src/repositories/quiz-attempt-repository.php';
+require_once __DIR__ . '/../src/repositories/quiz-live-repository.php';
 require_once __DIR__ . '/../src/services/auth-service.php';
 require_once __DIR__ . '/../src/services/calculator-operation-service.php';
 require_once __DIR__ . '/../src/services/lab-experiment-service.php';
@@ -39,6 +40,7 @@ require_once __DIR__ . '/../src/services/lab-mixing-service.php';
 require_once __DIR__ . '/../src/services/lab-identification-service.php';
 require_once __DIR__ . '/../src/services/lab-catalog-service.php';
 require_once __DIR__ . '/../src/services/quiz-room-service.php';
+require_once __DIR__ . '/../src/services/quiz-live-service.php';
 require_once __DIR__ . '/../src/services/quiz-auto-service.php';
 require_once __DIR__ . '/../src/services/assistant-service.php';
 require_once __DIR__ . '/../src/controllers/auth-controller.php';
@@ -118,10 +120,17 @@ try {
         new QuizAttemptRepository($database),
         $userRepository
     );
+    $quizLiveService = new QuizLiveService(
+        $database,
+        new QuizLiveRepository($database),
+        new QuizAttemptRepository($database),
+        $userRepository
+    );
 
     $quizRoomController = new QuizRoomController(
         $quizRoomService,
-        new QuizAutoService($quizRoomService)
+        new QuizAutoService($quizRoomService),
+        $quizLiveService
     );
 
     $classroomController = new ClassroomController($database);

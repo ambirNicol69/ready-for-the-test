@@ -38,14 +38,19 @@ function buildGame() {
   const prompt = el('div', 'mini-calc-prompt');
   const status = el('p', 'mini-calc-status', 'Pulsa las teclas y luego comprueba tu resultado.');
   const records = el('p', 'mini-calc-records', 'Cargando tus récords...');
+  const displayStage = el('div', 'mini-calc-display-stage');
   const display = document.createElement('input');
   display.id = 'miniCalcDisplay';
   display.className = 'mini-calc-display';
   display.readOnly = true;
   display.setAttribute('aria-label', 'Pantalla de la calculadora del minijuego');
+  const feedback = el('p', 'mini-calc-feedback', '¡Buen cálculo!');
+  feedback.hidden = true;
+  feedback.setAttribute('aria-live', 'polite');
+  displayStage.append(display, feedback);
 
   const keypad = el('div', 'mini-calc-keypad');
-  CALCULATOR_KEYS.flat().forEach((key) => keypad.append(createKey(key)));
+  CALCULATOR_KEYS.flat().forEach((key, index) => keypad.append(createKey(key, index)));
   const history = el('ul');
   history.id = 'miniCalcHistory';
   history.hidden = true;
@@ -55,14 +60,15 @@ function buildGame() {
   check.type = 'button';
   check.dataset.action = 'check';
   actions.append(check);
-  root.append(summary, prompt, display, keypad, status, records, actions, history);
-  return { root, prompt, progress, score, streak, timer, status, records, display, keypad, check };
+  root.append(summary, prompt, displayStage, keypad, status, records, actions, history);
+  return { root, prompt, progress, score, streak, timer, status, records, display, displayStage, feedback, keypad, check };
 }
 
-function createKey(key) {
+function createKey(key, index) {
   const button = el('button', 'mini-calc-key', key);
   button.type = 'button';
   button.dataset.key = key;
+  button.style.setProperty('--key-delay', `${index * 22}ms`);
   button.setAttribute('aria-label', key === '√' ? 'raíz cuadrada' : key);
   return button;
 }
@@ -125,6 +131,13 @@ function renderStats(element, stats) {
 function handleKey(event, calculator, game) {
   const button = event.target.closest('[data-key]');
   if (!button || game.check.dataset.action !== 'check') return;
+  const recoveringFromError = game.root.classList.contains('has-wrong-answer');
+  game.root.classList.remove('has-wrong-answer');
+  if (recoveringFromError) game.status.textContent = 'Ajusta la operación y vuelve a comprobarla.';
+  game.display.classList.remove('is-incorrect', 'is-correct', 'is-updating');
+  requestAnimationFrame(() => {
+    if (game.root.isConnected) game.display.classList.add('is-updating');
+  });
   const { key } = button.dataset;
   if (/^\d$/.test(key)) calculator.pressNumber(key);
   else if (['+', '-', '*', '/'].includes(key)) calculator.pressOperator(key);
@@ -145,9 +158,14 @@ function checkAnswer(state, game, calculator) {
   if (Math.abs(answer - state.challenge.answer) > 0.000001) {
     state.streak = 0;
     game.streak.textContent = 'Racha: 0';
+    game.root.classList.add('has-wrong-answer');
+    game.display.classList.add('is-incorrect');
     game.status.textContent = 'Todavía no. Revisa la operación e inténtalo de nuevo.';
     return;
   }
+  game.root.classList.add('has-correct-answer');
+  game.display.classList.add('is-correct');
+  game.feedback.hidden = false;
   awardAnswer(state, game);
 }
 
@@ -158,6 +176,7 @@ function awardAnswer(state, game) {
   state.points += POINTS_PER_ANSWER + bonus;
   game.score.textContent = `Puntos: ${state.points}`;
   game.streak.textContent = `Racha: ${state.streak}`;
+  game.keypad.querySelectorAll('button').forEach((button) => { button.disabled = true; });
   if (state.round === TOTAL_QUESTIONS) return finishGame(state, game);
   game.status.textContent = bonus ? `¡Correcto! Racha: +${bonus} puntos extra.` : '¡Correcto! +10 puntos.';
   game.check.textContent = 'Siguiente reto';
@@ -171,6 +190,10 @@ function loadChallenge(state, game, calculator) {
     game.check.textContent = 'Comprobar resultado';
   }
   calculator.clearAll();
+  game.keypad.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+  game.root.classList.remove('has-correct-answer', 'has-wrong-answer');
+  game.display.classList.remove('is-correct', 'is-incorrect', 'is-updating');
+  game.feedback.hidden = true;
   state.challenge = createChallenge();
   game.progress.textContent = `Reto ${state.round + 1} de ${TOTAL_QUESTIONS}`;
   game.prompt.replaceChildren(el('span', 'mini-calc-label', 'RESUELVE'), el('strong', '', state.challenge.prompt));
