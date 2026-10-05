@@ -134,14 +134,21 @@ La aplicación en funcionamiento:
 | -------- | ------- |
 | Inicio de sesión | ![Login](docs/capturas/01-login.png) |
 | Registro de usuario | ![Registro](docs/capturas/02-registro.png) |
-| Calculadora científica | ![Calculadora](docs/capturas/03-calculadora.png) |
-| Laboratorio | ![Laboratorio](docs/capturas/04-laboratorio.png) |
-| Catálogo de sustancias | ![Sustancias](docs/capturas/05-catalogo-sustancias.png) |
-| Catálogo de Matemáticas | ![Matemáticas](docs/capturas/06-catalogo-matematicas.png) |
-| Mesa de mezclas | ![Mezclas](docs/capturas/07-mezclas.png) |
-| Identificación de sustancias | ![Identificación](docs/capturas/08-identificacion.png) |
-| Salas de examen (docente) | ![Salas](docs/capturas/09-salas-docente.png) |
-| Perfil con puntos | ![Perfil](docs/capturas/10-perfil.png) |
+| Página de inicio (estudiante) | ![Inicio](docs/capturas/03-inicio.png) |
+| Lecciones | ![Lecciones](docs/capturas/04-lecciones.png) |
+| Laboratorio: mesa de mezclas | ![Mezclas](docs/capturas/05-laboratorio-mezclas.png) |
+| Laboratorio: identificación de sustancias | ![Identificación](docs/capturas/06-identificacion.png) |
+| Catálogo de sustancias | ![Sustancias](docs/capturas/07-catalogo-sustancias.png) |
+| Catálogo de Matemáticas | ![Matemáticas](docs/capturas/08-catalogo-matematicas.png) |
+| Salas de examen (estudiante) | ![Salas estudiante](docs/capturas/09-salas-estudiante.png) |
+| Salón de clase | ![Clases](docs/capturas/10-clases.png) |
+| Centro de minijuegos | ![Minijuegos](docs/capturas/11-minijuegos.png) |
+| Minijuego: Reto Calculadora | ![Juego calculadora](docs/capturas/12-juego-calculadora.png) |
+| Perfil con puntos y tienda de avatares | ![Perfil](docs/capturas/13-perfil.png) |
+| Asistente de contexto (Milo) | ![Asistente](docs/capturas/14-asistente.png) |
+| Página de inicio (docente) | ![Inicio docente](docs/capturas/15-inicio-docente.png) |
+| Salas de examen (docente) | ![Salas docente](docs/capturas/16-salas-docente.png) |
+| Salones de clase (docente) | ![Clases docente](docs/capturas/17-clases-docente.png) |
 
 ## Integrantes
 
