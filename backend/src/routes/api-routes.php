@@ -226,6 +226,9 @@ if ($requestMethod === 'GET' && $route === '/api/classrooms') {
 if ($requestMethod === 'POST' && $route === '/api/classrooms') {
     $currentUser = $authMiddleware->authenticate(); $classroomController->create($currentUser); return;
 }
+if ($requestMethod === 'POST' && $route === '/api/classrooms/join') {
+    $currentUser = $authMiddleware->authenticate(); $classroomController->join($currentUser); return;
+}
 if ($requestMethod === 'POST' && matchRoute('/api/classrooms/{id}/students', $route, $routeParams)) {
     $currentUser = $authMiddleware->authenticate(); $classroomController->addStudent($currentUser, (int) $routeParams['id']); return;
 }

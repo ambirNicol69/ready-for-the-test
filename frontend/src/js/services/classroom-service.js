@@ -20,6 +20,7 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
 
 export const list = () => request('/api/classrooms');
 export const create = (body) => request('/api/classrooms', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` } });
+export const join = (body) => request('/api/classrooms/join', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` } });
 export const addStudent = (id, email) => request(`/api/classrooms/${id}/students`, { method: 'POST', body: JSON.stringify({ email }), headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` } });
 export const createAssignment = (id, body) => request(`/api/classrooms/${id}/assignments`, { method: 'POST', body });
 export const submit = (id, body) => request(`/api/assignments/${id}/submissions`, { method: 'POST', body });

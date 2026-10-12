@@ -35,6 +35,17 @@ final class ClassroomController
         jsonResponse(201, true, ['id' => (int) $this->db->lastInsertId(), 'name' => $name, 'join_code' => $code, 'student_count' => 0, 'assignments' => []], 'Salón creado');
     }
 
+    public function join(User $user): void
+    {
+        $this->student($user);
+        $body = readJsonBody(); $code = strtoupper(trim((string) ($body['code'] ?? '')));
+        if ($code === '') throw new ValidationException('Escribe el código del salón');
+        $stmt = $this->db->prepare('SELECT id FROM classrooms WHERE join_code=?'); $stmt->execute([$code]); $classId = $stmt->fetchColumn();
+        if (!$classId) throw new NotFoundException('Código de salón no válido');
+        $stmt = $this->db->prepare('INSERT IGNORE INTO classroom_students (classroom_id,student_id) VALUES (?,?)'); $stmt->execute([$classId, $user->id]);
+        jsonResponse(200, true, null, $stmt->rowCount() ? 'Te uniste al salón' : 'Ya perteneces a este salón');
+    }
+
     public function addStudent(User $user, int $classId): void
     {
         $this->teacher($user); $this->ownedClass($classId, $user->id);

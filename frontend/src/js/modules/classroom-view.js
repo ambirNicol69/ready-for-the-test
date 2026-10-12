@@ -8,7 +8,18 @@ export function renderClassrooms(container) {
   container.appendChild(createViewHeader(session.isTeacher ? 'Salón de clase' : 'Mis clases', session.isTeacher ? 'Organiza tus grupos, comparte asignaciones y revisa entregas.' : 'Consulta tus asignaciones y entrega tus trabajos.'));
   const body = el('div'); body.id = 'classroomList'; container.appendChild(body);
   if (session.isTeacher) container.insertBefore(buildClassForm(loadClasses), body);
+  else container.insertBefore(buildJoinForm(loadClasses), body);
   loadClasses();
+}
+
+function buildJoinForm(refresh) {
+  const card = el('section', 'cajon'); card.appendChild(el('h3', '', 'Unirme a un salón'));
+  const form = el('form', 'formulario');
+  const code = createField({ id: 'joinCode', label: 'Código del salón', required: true });
+  const message = el('div'); const button = el('button', 'btn btn-primario', 'Unirme'); button.type = 'submit';
+  form.append(code.wrapper, message, button); card.appendChild(form);
+  form.addEventListener('submit', async (event) => { event.preventDefault(); button.disabled = true; try { const result = await classes.join({ code: code.input.value.trim() }); message.replaceChildren(el('p', 'badge badge-verde', result.message || 'Te uniste al salón')); code.input.value = ''; refresh(); } catch (error) { message.replaceChildren(createAlert(error.message)); } finally { button.disabled = false; } });
+  return card;
 }
 
 function buildClassForm(refresh) {
